@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotización – S-Sur Rent a Car</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rojo:       #8b1a2a;
+      --rojo-dark:  #6d0e1b;
+      --azul:       #1e2d47;
+      --azul-med:   #2d3e5f;
+      --azul-light: #4a5f80;
+      --gris-bg:    #f0f2f5;
+      --gris-row:   #f5f7fa;
+      --borde:      #d0d6e2;
+      --borde-t:    #adb5c6;
+      --verde:      #27ae60;
+      --font:       Arial, Helvetica, sans-serif;
+    }
+
+    body { font-family: var(--font); font-size: 13px; background: var(--gris-bg); color: #222; }
+
+    /* ══════════════════════════════════
+       VIEW 1 — EDITAR
+    ══════════════════════════════════ */
+    #view-editar { max-width: 980px; margin: 0 auto; padding: 24px 16px; }
+
+    .edit-topbar {
+      background: var(--azul);
+      color: #fff;
+      border-radius: 6px 6px 0 0;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand { font-size: 17px; font-weight: 900; font-style: italic; letter-spacing: 1px; }
+    .brand .dot { color: #f0a0a0; }
+    .brand small { font-size: 10px; font-weight: 400; opacity: 0.75; margin-left: 4px; }
+
+    .step-badge {
+      font-size: 11px;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .status-bar {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.12);
+      margin-left: auto;
+    }
+    .status-bar.ok   { background: rgba(39,174,96,0.35); }
+    .status-bar.warn { background: rgba(230,126,34,0.35); }
+    .status-bar.err  { background: rgba(192,57,43,0.35); }
+
+    .edit-panel {
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 22px 22px 18px;
+    }
+
+    /* Meta fields */
+    .edit-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+
+    .field label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--azul-med);
+    }
+
+    .field input {
+      padding: 7px 10px;
+      border: 1px solid var(--borde);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: var(--font);
+    }
+
+    .field input:focus { border-color: var(--azul-med); outline: none; box-shadow: 0 0 0 2px rgba(45,62,95,0.1); }
+
+    /* Tabla */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--azul-med);
+      margin-bottom: 8px;
+    }
+
+    .tw { border: 1px solid var(--borde-t); border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead tr { background: var(--azul-med); color: #fff; }
+
+    thead th {
+      padding: 9px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+      border-right: 1px solid var(--azul-light);
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    thead th:last-child { border-right: none; }
+
+    tbody tr:nth-child(even) { background: var(--gris-row); }
+    tbody tr:hover { background: #eef2f8; }
+
+    tbody td {
+      padding: 5px 5px;
+      border-right: 1px solid var(--borde);
+      border-bottom: 1px solid var(--borde);
+      vertical-align: middle;
+    }
+
+    tbody td:last-child { border-right: none; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .c-cant   { width: 68px; }
+    .c-modelo { }
+    .c-ded    { width: 88px; }
+    .c-kms    { width: 88px; }
+    .c-plazo  { width: 86px; }
+    .c-tarifa { width: 92px; }
+    .c-act    { width: 34px; }
+
+    td input, td select {
+      width: 100%;
+      padding: 5px 5px;
+      border: 1px solid var(--borde);
+      border-radius: 3px;
+      font-size: 12px;
+      font-family: var(--font);
+      background: #fff;
+    }
+
+    td input:focus, td select:focus {
+      border-color: var(--azul-med);
+      outline: none;
+    }
+
+    td input[type="number"] { text-align: center; }
+    td input[type="text"]   { text-align: left; }
+
+    td input.f-tarifa {
+      text-align: center;
+      font-weight: 700;
+      color: var(--azul-med);
+      background: #eef2f8;
+    }
+
+    td input.f-tarifa:focus { background: #fff; }
+
+    td input.f-kms { text-align: center; }
+
+    .btn-rm {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #c0392b;
+      font-size: 15px;
+      padding: 3px 7px;
+      border-radius: 3px;
+      display: block;
+      margin: auto;
+    }
+    .btn-rm:hover { background: #fde8e8; }
+
+    /* Controles */
+    .table-footer { display: flex; align-items: center; gap: 10px; margin-bottom: 0; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font);
+      transition: background 0.18s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-outline { background: #fff; color: var(--azul-med); border: 1.5px solid var(--azul-med); }
+    .btn-outline:hover { background: #f0f4fa; }
+
+    .btn-dark { background: var(--azul-med); color: #fff; }
+    .btn-dark:hover { background: var(--azul); }
+
+    .btn-red { background: var(--rojo); color: #fff; padding: 9px 22px; font-size: 13px; }
+    .btn-red:hover { background: var(--rojo-dark); }
+
+    .btn-green { background: var(--verde); color: #fff; padding: 9px 22px; font-size: 13px; }
+    .btn-green:hover { background: #1e8449; }
+
+    .confirm-bar {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--borde);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .confirm-bar .hint { font-size: 11px; color: #888; flex: 1; line-height: 1.5; }
+
+    /* ══════════════════════════════════
+       VIEW 2 — PREVIEW / EXPORT
+    ══════════════════════════════════ */
+    #view-preview { background: var(--gris-bg); min-height: 100vh; padding: 20px 16px 40px; }
+
+    .preview-bar {
+      max-width: 210mm;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-bar .hint { font-size: 11px; color: #777; margin-left: auto; }
+
+    /* Documento A4 */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    }
+
+    /* Header S-Sur */
+    .hdr {
+      background: linear-gradient(135deg, var(--rojo) 0%, #9e1a2b 45%, var(--rojo-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100px;
+      overflow: hidden;
+    }
+
+    .hdr-car { width: 175px; height: 100px; background: linear-gradient(to right, rgba(0,0,0,0.32), transparent); flex-shrink: 0; }
+
+    .hdr-logo { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+    .logo-box { text-align: center; color: #fff; }
+    .logo-main { font-size: 40px; font-weight: 900; letter-spacing: -2px; line-height: 1; font-style: italic; }
+    .logo-dot  { color: #f0a0a0; }
+    .logo-sub  { font-size: 10px; letter-spacing: 5px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+
+    .hdr-contact { padding: 10px 20px; color: #fff; font-size: 11px; line-height: 1.9; text-align: right; min-width: 170px; }
+    .hdr-contact span { display: block; }
+
+    /* Doc body */
+    .doc { padding: 28px 36px 36px; }
+
+    .doc-fecha { text-align: right; margin-bottom: 22px; }
+
+    .editable {
+      border: none;
+      border-bottom: 1px dashed #bbb;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 13px;
+      color: #222;
+      padding: 1px 3px;
+    }
+
+    .editable:focus { border-bottom-color: var(--azul-med); outline: none; }
+
+    .doc-dest { margin-bottom: 18px; line-height: 2; }
+
+    .doc-intro { margin-bottom: 22px; line-height: 1.6; }
+
+    /* Tabla preview */
+    .ptw { border: 1px solid var(--borde-t); border-radius: 3px; overflow: hidden; margin-bottom: 22px; }
+    .ptw table { width: 100%; border-collapse: collapse; }
+    .ptw thead tr { background: var(--azul-med); color: #fff; }
+    .ptw thead th { padding: 9px 8px; font-size: 12px; font-weight: 700; text-align: center; border-right: 1px solid var(--azul-light); vertical-align: middle; }
+    .ptw thead th:last-child { border-right: none; }
+    .ptw tbody tr:nth-child(even) { background: var(--gris-row); }
+    .ptw tbody td { padding: 6px 8px; border-right: 1px solid var(--borde); border-bottom: 1px solid var(--borde); text-align: center; font-size: 12px; vertical-align: middle; }
+    .ptw tbody td.td-mod { text-align: left; }
+    .ptw tbody td.td-cant { font-weight: 700; color: var(--azul-med); }
+    .ptw tbody td:last-child { border-right: none; }
+    .ptw tbody tr:last-child td { border-bottom: none; }
+
+    /* Condiciones */
+    .cond { font-size: 12px; line-height: 1.7; margin-bottom: 24px; }
+    .cond p { margin-bottom: 8px; }
+    .cond ul { list-style: disc; padding-left: 20px; margin-bottom: 4px; }
+    .cond ul li { margin-bottom: 3px; }
+    .cond ul ul { margin-top: 3px; }
+    .negrita { font-weight: 900; }
+
+    /* Firma */
+    .firma { text-align: center; margin-top: 36px; font-size: 13px; line-height: 2.3; }
+    .firma-nombre { font-weight: 700; font-size: 14px; text-align: center; min-width: 220px; }
+
+    /* ══════════════════════════════════
+       PRINT
+    ══════════════════════════════════ */
+    @media print {
+      body, #view-preview { background: #fff; }
+      #view-editar { display: none !important; }
+      #view-preview { padding: 0; }
+      .preview-bar { display: none !important; }
+      .page { margin: 0; box-shadow: none; width: 100%; }
+      .editable { border: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     VISTA 1: EDITAR
+══════════════════════════════════════ -->
+<div id="view-editar">
+  <div class="edit-topbar">
+    <div class="brand">S<span class="dot">·</span>SUR<small>RENT A CAR</small></div>
+    <div class="step-badge">PASO 1 / 2 — Editar datos</div>
+    <div class="status-bar" id="status-bar">Iniciando…</div>
+  </div>
+
+  <div class="edit-panel">
+
+    <!-- Datos generales -->
+    <div class="edit-meta">
+      <div class="field">
+        <label>Destinatario / Empresa</label>
+        <input type="text" id="meta-dest" placeholder="Nombre empresa o cliente" />
+      </div>
+      <div class="field">
+        <label>Ciudad y Fecha</label>
+        <input type="text" id="meta-fecha" />
+      </div>
+      <div class="field">
+        <label>Analista</label>
+        <input type="text" id="meta-analista" value="Michelle Aguero" />
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <p class="section-label">Vehículos a cotizar</p>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr>
+            <th class="c-cant">Cantidad</th>
+            <th class="c-modelo">Modelo</th>
+            <th class="c-ded">Deducible<br/>(UF)</th>
+            <th class="c-kms">Kms<br/>promedio</th>
+            <th class="c-plazo">Plazo<br/>(meses)</th>
+            <th class="c-tarifa">Tarifa Neta<br/>(UF)</th>
+            <th class="c-act"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <button class="btn btn-outline" onclick="agregarFila()">+ Agregar fila</button>
+    </div>
+
+    <div class="confirm-bar">
+      <span class="hint">
+        Deducible [0 / 5 / 10 UF] y plazo [12 / 24 / 36 / 48 meses] son opciones fijas.<br/>
+        Kms promedio y tarifa neta son variables — ingresar manualmente según el cliente.
+      </span>
+      <button class="btn btn-red" onclick="irAPreview()">Confirmar cotización →</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     VISTA 2: PREVIEW / EXPORT
+══════════════════════════════════════ -->
+<div id="view-preview" style="display:none">
+
+  <div class="preview-bar">
+    <button class="btn btn-outline" onclick="volverAEditar()">← Volver a editar</button>
+    <span class="hint">Los campos subrayados son editables en esta vista antes de exportar.</span>
+    <button class="btn btn-green" onclick="exportarPDF()">Exportar PDF</button>
+  </div>
+
+  <div class="page">
+
+    <!-- Header S-Sur -->
+    <header class="hdr">
+      <div class="hdr-car"></div>
+      <div class="hdr-logo">
+        <div class="logo-box">
+          <div class="logo-main">S<span class="logo-dot">·</span>SUR</div>
+          <div class="logo-sub">RENT &nbsp; A &nbsp; CAR</div>
+        </div>
+      </div>
+      <div class="hdr-contact">
+        <span>www.ssurrentacar.cl</span>
+        <span>600 600 4004</span>
+        <span>ssurrentacar</span>
+      </div>
+    </header>
+
+    <div class="doc">
+
+      <div class="doc-fecha">
+        <input type="text" id="p-fecha" class="editable" style="text-align:right; min-width:260px" />
+      </div>
+
+      <div class="doc-dest">
+        <strong>Sres.</strong><br/>
+        <strong><input type="text" id="p-dest" class="editable" style="font-weight:700; min-width:240px" /></strong><br/>
+        <strong>Presente:</strong>
+      </div>
+
+      <div class="doc-intro">
+        <p>De nuestra consideración:</p><br/>
+        <p>En respuesta a lo solicitado, tenemos el agrado de informar nuestras tarifas
+          <u><strong>referenciales</strong></u> de leasing operativo por los vehículos requeridos
+        </p>
+      </div>
+
+      <!-- Tabla read-only -->
+      <div class="ptw">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px">Cantidad</th>
+              <th>Modelo</th>
+              <th style="width:85px">Deducible<br/>Neto (UF)</th>
+              <th style="width:88px">Kms<br/>promedio</th>
+              <th style="width:78px">Plazo<br/>(meses)</th>
+              <th style="width:88px">Tarifa Neta<br/>(UF)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-preview"></tbody>
+        </table>
+      </div>
+
+      <!-- Condiciones -->
+      <div class="cond">
+        <p>Las tarifas están presentadas en valores netos mensuales, y se encuentran expresadas en unidades de fomento, contemplando los siguientes parámetros:</p>
+        <ul>
+          <li>Kilometraje promedio mensual: <span id="p-kms">3.000</span> km/mes.</li>
+          <li>Seguro con 5 UF deducible neto en caso de daño o siniestro. Para eventos extraordinarios se contemplan los siguientes deducibles especiales:
+            <ul>
+              <li>Volcamiento: 20 UF + IVA</li>
+              <li>Pérdida total: 50 UF + IVA</li>
+              <li>Robo: 50 UF + IVA</li>
+            </ul>
+          </li>
+          <li>Nuestras tarifas consideran seguro por responsabilidad civil de hasta 500 UF y una póliza adicional por responsabilidad civil emergente de hasta 5.000 UF. Esta última póliza opera bajo sentencia ejecutoriada.</li>
+          <li>Plazo contrato: <span id="p-plazo">36</span> meses.</li>
+          <li>Las tarifas incluyen:
+            <ul>
+              <li>Mantenciones cada 10.000 km a ejecutar en sucursales Salfa Sur o en taller autorizado por la arrendadora.</li>
+              <li>Reparaciones por uso normal y adecuado del vehículo según lo estipulado por los fabricantes. Los daños ocasionados por uso indebido, negligente o desgaste prematuro de piezas y partes son de cargo del arrendatario.</li>
+              <li>Cambios de neumáticos por desgaste natural. Vehículos se entregan con neumáticos de fábrica (mixtos), los cambios posteriores son también por tipo mixto. Se consideran cambios de neumáticos cada 50.000 km.</li>
+              <li>Servicio GPS. Demás accesorios de fábrica.</li>
+              <li>Es factible incorporar otros accesorios que el cliente requiera, previa cotización y acuerdo entre las partes.</li>
+              <li>El servicio de TAG será facturado por su uso, más un 5% por concepto de administración.</li>
+              <li>Tarifa considera reemplazo genérico (camioneta doble cabina diésel sin accesorios especiales). Tope de reemplazo 10% de la flota contratada y mínimo de 1 unidad. Entrega reemplazo a las 24 hrs de detenido el vehículo titular.</li>
+              <li>Documentación completa del vehículo requerida para circular: permisos de circulación, seguros obligatorios y revisiones técnicas.</li>
+            </ul>
+          </li>
+          <li>Las tarifas consideran facturación anticipada y crédito a 30 días desde la emisión de las facturas.</li>
+          <li>El precio informado se encuentra vigente hasta el 31 de octubre de 2025 o según variaciones de precios que informen los proveedores de vehículos. <span class="negrita">Tarifas pueden sufrir modificaciones según condiciones de mercado vigentes al mes de internación efectiva, modificaciones que son aceptados desde ya por el cliente, sin que ello signifique un incumplimiento de las condiciones por parte de S-Sur Ltda.</span></li>
+          <li>Fecha estimada de llegada por confirmar con proveedor, según stock disponible al momento de la confirmación de la operación.</li>
+          <li>Cierre de operación requiere evaluación financiera, apertura de línea de crédito y firma de contrato notarial.</li>
+        </ul>
+      </div>
+
+      <p style="margin-bottom:30px">Atenta a cualquier consulta, le saluda atentamente,</p>
+
+      <div class="firma">
+        <input type="text" id="p-analista" class="editable firma-nombre" /><br/>
+        <span>Analista RAC</span><br/>
+        <strong>S-Sur Ltda.</strong>
+      </div>
+
+    </div><!-- /doc -->
+  </div><!-- /page -->
+</div><!-- /view-preview -->
+
+<!-- Datalist para sugerencias de modelos -->
+<datalist id="dl-vehiculos"></datalist>
+
+<script>
+/* ══════════════════════════════════════════
+   REGLAS DE NEGOCIO (reglas_cotizacion.md)
+══════════════════════════════════════════ */
+const DEDUCIBLES = [0, 5, 10];       // UF — opciones FIJAS
+const PLAZOS     = [12, 24, 36, 48]; // meses — opciones FIJAS
+// Kms promedio : input numérico libre (VARIABLE por cliente)
+// Tarifa neta  : input texto libre  (VARIABLE por cliente)
+
+/* ══════════════════════════════════════════
+   CATÁLOGO DE VEHÍCULOS (mock — luego vendrá de API)
+   Fuente: LISTADO UNIDADES RAC.xlsx
+══════════════════════════════════════════ */
+const CATALOGO = [
+  'CHEVROLET MONTANA 1.2T LT MT S',
+  'CHEVROLET MONTANA 1.2T PREMIER MT S',
+  'MAXUS T60 4X2 DX MT E6',
+  'GREAT WALL POER 2.0 TD 4X2 ELITE F2',
+  'CHEVROLET COLORADO 2.8TD LTZ AT 4WD S',
+  'CHEVROLET COLORADO 2.8TD HC AT 4WD S',
+  'FORD RANGER DSL XLT 4X4 2.0L AT',
+  'TOYOTA HILUX SR 2.4L 4X4 MT',
+  'NISSAN FRONTIER 2.5L 4X4 MT',
+  'VOLKSWAGEN AMAROK 3.0 V6 TDI 4X4 AT',
+  'JAC T9 2.0T 4X4 AT',
+  'BYD SHARK 1.5T HYBRID 4X4 AT',
+];
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+let rowCount = 0;
+let solicitudId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const params = new URLSearchParams(window.location.search);
+  solicitudId = params.get('id') || null;
+
+  document.getElementById('meta-fecha').value = fechaTexto();
+  poblarDatalist();
+
+  if (solicitudId) {
+    setStatus(`Cargando solicitud #${solicitudId}…`, 'warn');
+    await cargarSolicitud(solicitudId);
+  } else {
+    setStatus('Sin solicitud vinculada — datos de ejemplo', '');
+    mockFilas();
+  }
+});
+
+/* ══════════════════════════════════════════
+   INTEGRACIÓN CON SISTEMA EXTERNO (Nubux)
+
+   Cuando llegue el usuario con ?id=XXX:
+   1. GET  {API_BASE}/solicitudes/XXX   → pre-carga la tabla
+   2. POST {API_BASE}/solicitudes/XXX/cotizacion → al exportar PDF
+
+   Adaptar aplicarDatos() al shape real de la respuesta.
+══════════════════════════════════════════ */
+const API_BASE = window.NUBUX_API || ''; // Sobreescribir desde config o ENV
+
+async function cargarSolicitud(id) {
+  try {
+    const r = await fetch(`${API_BASE}/solicitudes/${id}`, { headers: { Accept: 'application/json' } });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    aplicarDatos(data);
+    setStatus(`Solicitud #${id} cargada`, 'ok');
+  } catch (e) {
+    console.warn('API no disponible:', e.message);
+    setStatus(`API no disponible — usando datos de ejemplo`, 'warn');
+    mockFilas();
+  }
+}
+
+/**
+ * Adaptar al shape real de Nubux cuando se conozca.
+ * Se esperan campos como:
+ *   data.empresa | data.cliente | data.razon_social
+ *   data.vehiculos[] { modelo, cantidad, kms?, deducible?, plazo? }
+ */
+function aplicarDatos(data) {
+  document.getElementById('meta-dest').value =
+    data.empresa ?? data.cliente ?? data.razon_social ?? '';
+
+  const items = data.vehiculos ?? data.items ?? [];
+  if (items.length === 0) { agregarFila(); return; }
+
+  items.forEach(v => agregarFila({
+    cantidad : v.cantidad  ?? 1,
+    modelo   : v.modelo    ?? v.nombre ?? '',
+    deducible: v.deducible ?? 5,
+    kms      : v.kms_promedio ?? v.kms ?? 3000,
+    plazo    : v.plazo     ?? 36,
+    tarifa   : v.tarifa    ?? '',
+  }));
+}
+
+/* ══════════════════════════════════════════
+   AGREGAR FILA
+══════════════════════════════════════════ */
+function agregarFila(d = {}) {
+  const id    = ++rowCount;
+  const tbody = document.getElementById('tbody');
+  const tr    = document.createElement('tr');
+  tr.dataset.id = id;
+
+  /* Cantidad */
+  const inCant = mk('input', { type: 'number', min: 1, value: d.cantidad ?? 1 });
+  inCant.dataset.c = 'cant';
+
+  /* Modelo — texto libre con datalist para sugerencias */
+  const inMod = mk('input', { type: 'text', placeholder: 'Escribir o seleccionar modelo…', list: 'dl-vehiculos', value: d.modelo ?? '' });
+  inMod.dataset.c = 'modelo';
+  inMod.style.textAlign = 'left';
+
+  /* Deducible — select fijo [0, 5, 10] */
+  const selDed = mkSelect(DEDUCIBLES.map(v => ({ v, t: `${v} UF` })), d.deducible ?? 5);
+  selDed.dataset.c = 'ded';
+
+  /* Kms promedio — input libre */
+  const inKms = mk('input', { type: 'number', min: 100, step: 100, value: d.kms ?? 3000 });
+  inKms.dataset.c = 'kms';
+  inKms.className = 'f-kms';
+
+  /* Plazo — select fijo [12, 24, 36, 48] */
+  const selPlazo = mkSelect(PLAZOS.map(v => ({ v, t: `${v} m.` })), d.plazo ?? 36);
+  selPlazo.dataset.c = 'plazo';
+
+  /* Tarifa neta — input libre (manual por cliente) */
+  const inTarifa = mk('input', { type: 'text', inputMode: 'decimal', placeholder: '0,0', value: d.tarifa ?? '' });
+  inTarifa.dataset.c = 'tarifa';
+  inTarifa.className = 'f-tarifa';
+
+  /* Botón eliminar */
+  const btnRm = document.createElement('button');
+  btnRm.className = 'btn-rm';
+  btnRm.title = 'Eliminar fila';
+  btnRm.innerHTML = '&#x2715;';
+  btnRm.onclick = () => tr.remove();
+
+  tr.append(
+    wrapTd('c-cant',   inCant),
+    wrapTd('c-modelo', inMod),
+    wrapTd('c-ded',    selDed),
+    wrapTd('c-kms',    inKms),
+    wrapTd('c-plazo',  selPlazo),
+    wrapTd('c-tarifa', inTarifa),
+    wrapTd('c-act',    btnRm)
+  );
+
+  tbody.appendChild(tr);
+
+  // Foco en modelo si fila vacía
+  if (!d.modelo) inMod.focus();
+}
+
+/* ══════════════════════════════════════════
+   LEER FILAS
+══════════════════════════════════════════ */
+function leerFilas() {
+  return Array.from(document.querySelectorAll('#tbody tr')).map(tr => {
+    const g = campo => tr.querySelector(`[data-c="${campo}"]`)?.value ?? '';
+    return {
+      cantidad : parseInt(g('cant'))  || 1,
+      modelo   : g('modelo').trim(),
+      deducible: parseFloat(g('ded')),
+      kms      : parseInt(g('kms'))   || 3000,
+      plazo    : parseInt(g('plazo')),
+      tarifa   : g('tarifa').trim(),
+    };
+  });
+}
+
+/* ══════════════════════════════════════════
+   PASAR A PREVIEW
+══════════════════════════════════════════ */
+function irAPreview() {
+  const filas = leerFilas();
+
+  if (filas.length === 0) {
+    alert('Agregue al menos una fila antes de confirmar.');
+    return;
+  }
+  if (filas.some(f => !f.modelo)) {
+    alert('Hay filas sin modelo. Complete todos los campos antes de confirmar.');
+    return;
+  }
+  if (filas.some(f => !f.tarifa)) {
+    if (!confirm('Hay filas sin tarifa neta ingresada. ¿Desea continuar de todas formas?')) return;
+  }
+
+  // Sincronizar campos editables del doc
+  document.getElementById('p-fecha').value    = document.getElementById('meta-fecha').value;
+  document.getElementById('p-dest').value     = document.getElementById('meta-dest').value;
+  document.getElementById('p-analista').value = document.getElementById('meta-analista').value;
+
+  renderTablaPreview(filas);
+
+  // Resumen en condiciones (tomar primer item como referencia)
+  document.getElementById('p-kms').textContent   = Number(filas[0].kms).toLocaleString('es-CL');
+  document.getElementById('p-plazo').textContent = filas[0].plazo;
+
+  document.getElementById('view-editar').style.display  = 'none';
+  document.getElementById('view-preview').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════════
+   RENDERIZAR TABLA PREVIEW (con rowspan en Cantidad)
+   Agrupa filas consecutivas con la misma cantidad,
+   igual que el PDF modelo.
+══════════════════════════════════════════ */
+function renderTablaPreview(filas) {
+  const tbody = document.getElementById('tbody-preview');
+  tbody.innerHTML = '';
+
+  // Agrupar filas consecutivas por cantidad
+  const grupos = [];
+  filas.forEach(f => {
+    const last = grupos[grupos.length - 1];
+    if (last && last.cant === f.cantidad) {
+      last.items.push(f);
+    } else {
+      grupos.push({ cant: f.cantidad, items: [f] });
+    }
+  });
+
+  grupos.forEach(g => {
+    g.items.forEach((item, i) => {
+      const tr = document.createElement('tr');
+
+      if (i === 0) {
+        const tdC = document.createElement('td');
+        tdC.className = 'td-cant';
+        tdC.textContent = g.cant;
+        tdC.rowSpan = g.items.length;
+        if (g.items.length > 1) tdC.style.verticalAlign = 'middle';
+        tr.appendChild(tdC);
+      }
+
+      const tdM = document.createElement('td');
+      tdM.className = 'td-mod';
+      tdM.textContent = item.modelo;
+
+      const tdD = document.createElement('td');
+      tdD.textContent = item.deducible;
+
+      const tdK = document.createElement('td');
+      tdK.textContent = Number(item.kms).toLocaleString('es-CL');
+
+      const tdP = document.createElement('td');
+      tdP.textContent = item.plazo;
+
+      const tdT = document.createElement('td');
+      tdT.style.fontWeight = '700';
+      if (item.tarifa !== '') {
+        const n = parseFloat(item.tarifa.replace(',', '.'));
+        tdT.textContent = isNaN(n) ? item.tarifa : n.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      } else {
+        tdT.textContent = '—';
+        tdT.style.color = '#aaa';
+      }
+
+      tr.append(tdM, tdD, tdK, tdP, tdT);
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════
+   VOLVER A EDITAR
+══════════════════════════════════════════ */
+function volverAEditar() {
+  document.getElementById('view-preview').style.display = 'none';
+  document.getElementById('view-editar').style.display  = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════════
+   EXPORTAR PDF
+   Usa window.print() + CSS @media print.
+   TODO: tras imprimir, notificar a Nubux vía notificarNubux().
+══════════════════════════════════════════ */
+function exportarPDF() {
+  window.print();
+  // notificarNubux(solicitudId, leerFilas()); // descomentar al integrar
+}
+
+/* ══════════════════════════════════════════
+   NOTIFICAR A NUBUX (placeholder para integración)
+══════════════════════════════════════════ */
+async function notificarNubux(id, filas) {
+  if (!id || !API_BASE) return;
+  try {
+    await fetch(`${API_BASE}/solicitudes/${id}/cotizacion`, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify({
+        solicitudId : id,
+        fecha       : document.getElementById('p-fecha').value,
+        destinatario: document.getElementById('p-dest').value,
+        analista    : document.getElementById('p-analista').value,
+        items       : filas,
+        timestamp   : new Date().toISOString(),
+      }),
+    });
+  } catch (e) {
+    console.warn('No se pudo notificar a Nubux:', e.message);
+  }
+}
+
+/* ══════════════════════════════════════════
+   HELPERS DOM
+══════════════════════════════════════════ */
+function mk(tag, attrs = {}) {
+  const el = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === 'inputMode') el.inputMode = v;
+    else el[k] = v;
+  });
+  return el;
+}
+
+function mkSelect(opciones, defVal) {
+  const sel = document.createElement('select');
+  opciones.forEach(({ v, t }) => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = t;
+    if (v == defVal) o.selected = true;
+    sel.appendChild(o);
+  });
+  return sel;
+}
+
+function wrapTd(cls, child) {
+  const td = document.createElement('td');
+  td.className = cls;
+  td.appendChild(child);
+  return td;
+}
+
+function poblarDatalist() {
+  const dl = document.getElementById('dl-vehiculos');
+  CATALOGO.forEach(n => {
+    const o = document.createElement('option');
+    o.value = n;
+    dl.appendChild(o);
+  });
+}
+
+function setStatus(msg, tipo) {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className = `status-bar${tipo ? ' ' + tipo : ''}`;
+}
+
+function fechaTexto() {
+  const d = new Date();
+  const meses = ['enero','febrero','marzo','abril','mayo','junio',
+                  'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `Puerto Montt, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+}
+
+/* ══════════════════════════════════════════
+   DATOS MOCK — para desarrollo sin API
+══════════════════════════════════════════ */
+function mockFilas() {
+  [
+    { cantidad: 1, modelo: 'CHEVROLET MONTANA 1.2T LT MT S',        deducible: 5, kms: 3000, plazo: 36, tarifa: '13,3' },
+    { cantidad: 1, modelo: 'CHEVROLET MONTANA 1.2T PREMIER MT S',    deducible: 5, kms: 3000, plazo: 36, tarifa: '14,1' },
+    { cantidad: 1, modelo: 'MAXUS T60 4X2 DX MT E6',                 deducible: 5, kms: 3000, plazo: 36, tarifa: '14,1' },
+    { cantidad: 1, modelo: 'GREAT WALL POER 2.0 TD 4X2 ELITE F2',   deducible: 5, kms: 3000, plazo: 36, tarifa: '15,5' },
+    { cantidad: 2, modelo: 'CHEVROLET COLORADO 2.8TD LTZ AT 4WD S', deducible: 5, kms: 3000, plazo: 36, tarifa: '22,8' },
+    { cantidad: 2, modelo: 'CHEVROLET COLORADO 2.8TD HC AT 4WD S',  deducible: 5, kms: 3000, plazo: 36, tarifa: '23,8' },
+    { cantidad: 2, modelo: 'FORD RANGER DSL XLT 4X4 2.0L AT',       deducible: 5, kms: 3000, plazo: 36, tarifa: '23,6' },
+  ].forEach(agregarFila);
+}
+</script>
+</body>
+</html>
