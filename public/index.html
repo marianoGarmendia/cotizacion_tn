@@ -21,121 +21,271 @@
       --font:       Arial, Helvetica, sans-serif;
     }
 
-    body { font-family: var(--font); font-size: 13px; background: var(--gris-bg); color: #222; }
+    body {
+      font-family: var(--font);
+      font-size: 13px;
+      background: var(--gris-bg);
+      color: #222;
+    }
 
     /* ══════════════════════════════════
-       VIEW 1 — EDITAR
+       APP BAR (fuera del documento A4)
     ══════════════════════════════════ */
-    #view-editar { max-width: 980px; margin: 0 auto; padding: 24px 16px; }
-
-    .edit-topbar {
+    #app-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       background: var(--azul);
       color: #fff;
-      border-radius: 6px 6px 0 0;
-      padding: 12px 20px;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
 
     .brand { font-size: 17px; font-weight: 900; font-style: italic; letter-spacing: 1px; }
     .brand .dot { color: #f0a0a0; }
     .brand small { font-size: 10px; font-weight: 400; opacity: 0.75; margin-left: 4px; }
 
-    .step-badge {
+    #status-bar {
       font-size: 11px;
-      background: rgba(255,255,255,0.15);
       padding: 3px 10px;
       border-radius: 20px;
-    }
-
-    .status-bar {
-      font-size: 11px;
-      padding: 4px 10px;
-      border-radius: 4px;
       background: rgba(255,255,255,0.12);
-      margin-left: auto;
     }
-    .status-bar.ok   { background: rgba(39,174,96,0.35); }
-    .status-bar.warn { background: rgba(230,126,34,0.35); }
-    .status-bar.err  { background: rgba(192,57,43,0.35); }
+    #status-bar.ok   { background: rgba(39,174,96,0.4); }
+    #status-bar.warn { background: rgba(230,126,34,0.4); }
 
-    .edit-panel {
-      background: #fff;
-      border: 1px solid var(--borde);
-      border-top: none;
-      border-radius: 0 0 6px 6px;
-      padding: 22px 22px 18px;
-    }
+    .spacer { flex: 1; }
 
-    /* Meta fields */
-    .edit-meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 4px; }
-
-    .field label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--azul-med);
-    }
-
-    .field input {
-      padding: 7px 10px;
-      border: 1px solid var(--borde);
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 16px;
+      border: none;
       border-radius: 4px;
-      font-size: 13px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
       font-family: var(--font);
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-ghost  { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-ghost:hover  { background: rgba(255,255,255,0.2); }
+    .btn-green  { background: var(--verde); color: #fff; }
+    .btn-green:hover  { background: #1e8449; }
+    .btn-rojo   { background: var(--rojo); color: #fff; }
+    .btn-rojo:hover   { background: var(--rojo-dark); }
+    .btn-rojo:disabled { background: #999; cursor: not-allowed; opacity: 0.7; }
+
+    /* ══════════════════════════════════
+       DOCUMENTO A4
+    ══════════════════════════════════ */
+    #doc-wrapper { padding: 24px 16px 56px; }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.18);
     }
 
-    .field input:focus { border-color: var(--azul-med); outline: none; box-shadow: 0 0 0 2px rgba(45,62,95,0.1); }
+    /* ── Indicadores de sección (solo en pantalla) ── */
+    .sec-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 2px 6px;
+      border-radius: 0 0 4px 0;
+      pointer-events: none;
+      user-select: none;
+    }
+    .sec-tag-hdr {
+      position: absolute;
+      top: 0; left: 0;
+      color: rgba(255,255,255,0.55);
+      background: rgba(0,0,0,0.18);
+    }
+    .sec-tag-body {
+      position: absolute;
+      top: -18px; left: 0;
+      color: var(--azul-light);
+      background: rgba(45,62,95,0.08);
+    }
 
-    /* Tabla */
-    .section-label {
+    /* ══════════════════════════════════
+       SECCIÓN 1 — CABECERA
+    ══════════════════════════════════ */
+    .hdr {
+      background: linear-gradient(135deg, var(--rojo) 0%, #9e1a2b 45%, var(--rojo-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hdr-car {
+      width: 175px;
+      height: 100px;
+      background: linear-gradient(to right, rgba(0,0,0,0.3), transparent);
+      flex-shrink: 0;
+    }
+
+    .hdr-logo { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+    .logo-box { text-align: center; color: #fff; }
+    .logo-main { font-size: 40px; font-weight: 900; letter-spacing: -2px; line-height: 1; font-style: italic; }
+    .logo-dot  { color: #f0a0a0; }
+    .logo-sub  { font-size: 10px; letter-spacing: 5px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+
+    .hdr-contact {
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 11px;
+      line-height: 2;
+      text-align: right;
+      min-width: 170px;
+    }
+
+    /* Campos editables en el header (contacto) */
+    .hdr-contact [contenteditable] {
+      display: block;
+      text-align: right;
+      outline: none;
+      border-radius: 2px;
+      padding: 0 2px;
+      transition: background 0.15s;
+    }
+    .hdr-contact [contenteditable]:hover  { background: rgba(255,255,255,0.15); cursor: text; }
+    .hdr-contact [contenteditable]:focus  { background: rgba(255,255,255,0.2); outline: 1px dashed rgba(255,255,255,0.5); }
+
+    /* ══════════════════════════════════
+       CUERPO DEL DOCUMENTO
+    ══════════════════════════════════ */
+    .doc { padding: 28px 36px 40px; }
+
+    /* Inputs inline — visualmente son texto del documento */
+    .f-doc {
+      border: none;
+      border-bottom: 1px dashed var(--borde-t);
+      background: transparent;
+      font-family: var(--font);
+      font-size: 13px;
+      color: #222;
+      padding: 1px 4px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .f-doc:hover  { background: rgba(45,62,95,0.04); }
+    .f-doc:focus  { border-bottom-color: var(--azul-med); outline: none; background: rgba(45,62,95,0.06); }
+
+    /* Bloques de texto con contenteditable */
+    .text-edit {
+      outline: none;
+      border-radius: 3px;
+      transition: background 0.15s;
+    }
+    .text-edit:hover { background: rgba(45,62,95,0.03); cursor: text; }
+    .text-edit:focus { background: rgba(45,62,95,0.05); outline: 1px dashed var(--borde-t); }
+
+    .doc-fecha { text-align: right; margin-bottom: 22px; }
+    .doc-dest  { margin-bottom: 18px; line-height: 2.1; }
+    .doc-intro { margin-bottom: 22px; line-height: 1.65; }
+
+    /* ══════════════════════════════════
+       SECCIÓN 2 — TABLA
+    ══════════════════════════════════ */
+    .tabla-sec {
+      position: relative;
+      margin-bottom: 22px;
+      padding: 0;
+      border: 1.5px dashed transparent;
+      border-radius: 5px;
+      transition: border-color 0.2s;
+    }
+    .tabla-sec:hover { border-color: var(--borde-t); }
+    .tabla-sec.editando { border-color: var(--azul-med); border-style: solid; padding: 0 0 12px; }
+
+    .tabla-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0 8px;
+    }
+
+    .tabla-label {
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--azul-med);
-      margin-bottom: 8px;
+      flex: 1;
     }
 
-    .tw { border: 1px solid var(--borde-t); border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-
-    table { width: 100%; border-collapse: collapse; }
-
-    thead tr { background: var(--azul-med); color: #fff; }
-
-    thead th {
-      padding: 9px 7px;
+    /* Botones dentro del área del documento */
+    .btn-doc {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border: 1.5px solid var(--azul-med);
+      background: #fff;
+      color: var(--azul-med);
+      border-radius: 4px;
       font-size: 11px;
       font-weight: 700;
-      text-align: center;
-      border-right: 1px solid var(--azul-light);
-      white-space: nowrap;
-      vertical-align: middle;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background 0.15s;
     }
+    .btn-doc:hover { background: #eef2f8; }
+    .btn-doc.save  { background: var(--azul-med); color: #fff; }
+    .btn-doc.save:hover { background: var(--azul); }
+    .btn-doc.add   { border-color: var(--borde-t); color: #555; }
+    .btn-doc.add:hover  { background: #f5f5f5; }
 
-    thead th:last-child { border-right: none; }
-
-    tbody tr:nth-child(even) { background: var(--gris-row); }
-    tbody tr:hover { background: #eef2f8; }
-
-    tbody td {
-      padding: 5px 5px;
-      border-right: 1px solid var(--borde);
-      border-bottom: 1px solid var(--borde);
-      vertical-align: middle;
+    /* Tabla preview (modo vista) */
+    .ptw { border: 1px solid var(--borde-t); border-radius: 3px; overflow: hidden; }
+    .ptw table { width: 100%; border-collapse: collapse; }
+    .ptw thead tr { background: var(--azul-med); color: #fff; }
+    .ptw thead th {
+      padding: 9px 8px; font-size: 12px; font-weight: 700;
+      text-align: center; border-right: 1px solid var(--azul-light); vertical-align: middle;
     }
+    .ptw thead th:last-child { border-right: none; }
+    .ptw tbody tr:nth-child(even) { background: var(--gris-row); }
+    .ptw tbody td {
+      padding: 6px 8px; border-right: 1px solid var(--borde);
+      border-bottom: 1px solid var(--borde); text-align: center; font-size: 12px; vertical-align: middle;
+    }
+    .ptw tbody td.td-mod  { text-align: left; }
+    .ptw tbody td.td-cant { font-weight: 700; color: var(--azul-med); }
+    .ptw tbody td:last-child  { border-right: none; }
+    .ptw tbody tr:last-child td { border-bottom: none; }
 
-    tbody td:last-child { border-right: none; }
-    tbody tr:last-child td { border-bottom: none; }
+    /* Tabla editor (modo edición) */
+    .edit-wrap { border: 1px solid var(--borde-t); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
+    .edit-wrap table { width: 100%; border-collapse: collapse; }
+    .edit-wrap thead tr { background: var(--azul-med); color: #fff; }
+    .edit-wrap thead th {
+      padding: 9px 7px; font-size: 11px; font-weight: 700;
+      text-align: center; border-right: 1px solid var(--azul-light); white-space: nowrap; vertical-align: middle;
+    }
+    .edit-wrap thead th:last-child { border-right: none; }
+    .edit-wrap tbody tr:nth-child(even) { background: var(--gris-row); }
+    .edit-wrap tbody tbody tr:hover { background: #eef2f8; }
+    .edit-wrap tbody td {
+      padding: 5px; border-right: 1px solid var(--borde); border-bottom: 1px solid var(--borde); vertical-align: middle;
+    }
+    .edit-wrap tbody td:last-child { border-right: none; }
+    .edit-wrap tbody tr:last-child td { border-bottom: none; }
 
     .c-cant   { width: 68px; }
     .c-modelo { }
@@ -145,327 +295,200 @@
     .c-tarifa { width: 92px; }
     .c-act    { width: 34px; }
 
-    td input, td select {
-      width: 100%;
-      padding: 5px 5px;
-      border: 1px solid var(--borde);
-      border-radius: 3px;
-      font-size: 12px;
-      font-family: var(--font);
-      background: #fff;
+    .edit-wrap td input,
+    .edit-wrap td select {
+      width: 100%; padding: 5px; border: 1px solid var(--borde);
+      border-radius: 3px; font-size: 12px; font-family: var(--font); background: #fff;
     }
-
-    td input:focus, td select:focus {
-      border-color: var(--azul-med);
-      outline: none;
-    }
-
-    td input[type="number"] { text-align: center; }
-    td input[type="text"]   { text-align: left; }
-
-    td input.f-tarifa {
-      text-align: center;
-      font-weight: 700;
-      color: var(--azul-med);
-      background: #eef2f8;
-    }
-
-    td input.f-tarifa:focus { background: #fff; }
-
-    td input.f-kms { text-align: center; }
+    .edit-wrap td input:focus,
+    .edit-wrap td select:focus { border-color: var(--azul-med); outline: none; }
+    .edit-wrap td input[type="number"] { text-align: center; }
+    .edit-wrap td input[type="text"]   { text-align: left; }
+    .f-tarifa { text-align: center !important; font-weight: 700; color: var(--azul-med); background: #eef2f8 !important; }
+    .f-tarifa:focus { background: #fff !important; }
 
     .btn-rm {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #c0392b;
-      font-size: 15px;
-      padding: 3px 7px;
-      border-radius: 3px;
-      display: block;
-      margin: auto;
+      background: none; border: none; cursor: pointer; color: #c0392b;
+      font-size: 15px; padding: 3px 7px; border-radius: 3px; display: block; margin: auto;
     }
     .btn-rm:hover { background: #fde8e8; }
 
-    /* Controles */
-    .table-footer { display: flex; align-items: center; gap: 10px; margin-bottom: 0; }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 7px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: var(--font);
-      transition: background 0.18s, transform 0.1s;
-      white-space: nowrap;
+    .edit-footer {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 0 0 2px;
     }
-    .btn:active { transform: scale(0.97); }
-
-    .btn-outline { background: #fff; color: var(--azul-med); border: 1.5px solid var(--azul-med); }
-    .btn-outline:hover { background: #f0f4fa; }
-
-    .btn-dark { background: var(--azul-med); color: #fff; }
-    .btn-dark:hover { background: var(--azul); }
-
-    .btn-red { background: var(--rojo); color: #fff; padding: 9px 22px; font-size: 13px; }
-    .btn-red:hover { background: var(--rojo-dark); }
-
-    .btn-green { background: var(--verde); color: #fff; padding: 9px 22px; font-size: 13px; }
-    .btn-green:hover { background: #1e8449; }
-
-    .confirm-bar {
-      margin-top: 20px;
-      padding-top: 18px;
-      border-top: 1px solid var(--borde);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .confirm-bar .hint { font-size: 11px; color: #888; flex: 1; line-height: 1.5; }
+    .edit-hint { font-size: 10px; color: #999; flex: 1; }
 
     /* ══════════════════════════════════
-       VIEW 2 — PREVIEW / EXPORT
+       SECCIÓN 3 — CONDICIONES + FIRMA
     ══════════════════════════════════ */
-    #view-preview { background: var(--gris-bg); min-height: 100vh; padding: 20px 16px 40px; }
+    .sec3-wrap { position: relative; padding-top: 20px; }
 
-    .preview-bar {
-      max-width: 210mm;
-      margin: 0 auto 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .preview-bar .hint { font-size: 11px; color: #777; margin-left: auto; }
-
-    /* Documento A4 */
-    .page {
-      width: 210mm;
-      min-height: 297mm;
-      margin: 0 auto;
-      background: #fff;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-    }
-
-    /* Header S-Sur */
-    .hdr {
-      background: linear-gradient(135deg, var(--rojo) 0%, #9e1a2b 45%, var(--rojo-dark) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 100px;
-      overflow: hidden;
-    }
-
-    .hdr-car { width: 175px; height: 100px; background: linear-gradient(to right, rgba(0,0,0,0.32), transparent); flex-shrink: 0; }
-
-    .hdr-logo { flex: 1; display: flex; align-items: center; justify-content: center; }
-
-    .logo-box { text-align: center; color: #fff; }
-    .logo-main { font-size: 40px; font-weight: 900; letter-spacing: -2px; line-height: 1; font-style: italic; }
-    .logo-dot  { color: #f0a0a0; }
-    .logo-sub  { font-size: 10px; letter-spacing: 5px; color: rgba(255,255,255,0.85); margin-top: 2px; }
-
-    .hdr-contact { padding: 10px 20px; color: #fff; font-size: 11px; line-height: 1.9; text-align: right; min-width: 170px; }
-    .hdr-contact span { display: block; }
-
-    /* Doc body */
-    .doc { padding: 28px 36px 36px; }
-
-    .doc-fecha { text-align: right; margin-bottom: 22px; }
-
-    .editable {
-      border: none;
-      border-bottom: 1px dashed #bbb;
-      background: transparent;
-      font-family: var(--font);
-      font-size: 13px;
-      color: #222;
-      padding: 1px 3px;
-    }
-
-    .editable:focus { border-bottom-color: var(--azul-med); outline: none; }
-
-    .doc-dest { margin-bottom: 18px; line-height: 2; }
-
-    .doc-intro { margin-bottom: 22px; line-height: 1.6; }
-
-    /* Tabla preview */
-    .ptw { border: 1px solid var(--borde-t); border-radius: 3px; overflow: hidden; margin-bottom: 22px; }
-    .ptw table { width: 100%; border-collapse: collapse; }
-    .ptw thead tr { background: var(--azul-med); color: #fff; }
-    .ptw thead th { padding: 9px 8px; font-size: 12px; font-weight: 700; text-align: center; border-right: 1px solid var(--azul-light); vertical-align: middle; }
-    .ptw thead th:last-child { border-right: none; }
-    .ptw tbody tr:nth-child(even) { background: var(--gris-row); }
-    .ptw tbody td { padding: 6px 8px; border-right: 1px solid var(--borde); border-bottom: 1px solid var(--borde); text-align: center; font-size: 12px; vertical-align: middle; }
-    .ptw tbody td.td-mod { text-align: left; }
-    .ptw tbody td.td-cant { font-weight: 700; color: var(--azul-med); }
-    .ptw tbody td:last-child { border-right: none; }
-    .ptw tbody tr:last-child td { border-bottom: none; }
-
-    /* Condiciones */
     .cond { font-size: 12px; line-height: 1.7; margin-bottom: 24px; }
-    .cond p { margin-bottom: 8px; }
+    .cond p  { margin-bottom: 8px; }
     .cond ul { list-style: disc; padding-left: 20px; margin-bottom: 4px; }
     .cond ul li { margin-bottom: 3px; }
     .cond ul ul { margin-top: 3px; }
     .negrita { font-weight: 900; }
 
-    /* Firma */
     .firma { text-align: center; margin-top: 36px; font-size: 13px; line-height: 2.3; }
-    .firma-nombre { font-weight: 700; font-size: 14px; text-align: center; min-width: 220px; }
+    .firma .f-doc { font-weight: 700; font-size: 14px; text-align: center; min-width: 220px; }
 
     /* ══════════════════════════════════
        PRINT
     ══════════════════════════════════ */
     @media print {
-      body, #view-preview { background: #fff; }
-      #view-editar { display: none !important; }
-      #view-preview { padding: 0; }
-      .preview-bar { display: none !important; }
-      .page { margin: 0; box-shadow: none; width: 100%; }
-      .editable { border: none !important; }
+      body { background: #fff; }
+      #app-bar  { display: none !important; }
+      #doc-wrapper { padding: 0; }
+      .page { margin: 0; box-shadow: none; width: 100%; min-height: 0; }
+      .sec-tag  { display: none !important; }
+      .tabla-toolbar { display: none !important; }
+      #tabla-editor  { display: none !important; }
+      #tabla-vista   { display: block !important; }
+      .tabla-sec { border: none !important; padding: 0 !important; }
+      .sec3-wrap { padding-top: 0 !important; }
+      .f-doc, .f-doc-inline {
+        border-bottom: none !important;
+        background: transparent !important;
+      }
+      [contenteditable] {
+        outline: none !important;
+        background: transparent !important;
+      }
     }
   </style>
 </head>
 <body>
 
 <!-- ══════════════════════════════════════
-     VISTA 1: EDITAR
+     APP BAR
 ══════════════════════════════════════ -->
-<div id="view-editar">
-  <div class="edit-topbar">
-    <div class="brand">S<span class="dot">·</span>SUR<small>RENT A CAR</small></div>
-    <div class="step-badge">PASO 1 / 2 — Editar datos</div>
-    <div class="status-bar" id="status-bar">Iniciando…</div>
-  </div>
-
-  <div class="edit-panel">
-
-    <!-- Datos generales -->
-    <div class="edit-meta">
-      <div class="field">
-        <label>Destinatario / Empresa</label>
-        <input type="text" id="meta-dest" placeholder="Nombre empresa o cliente" />
-      </div>
-      <div class="field">
-        <label>Ciudad y Fecha</label>
-        <input type="text" id="meta-fecha" />
-      </div>
-      <div class="field">
-        <label>Analista</label>
-        <input type="text" id="meta-analista" value="Michelle Aguero" />
-      </div>
-    </div>
-
-    <!-- Tabla -->
-    <p class="section-label">Vehículos a cotizar</p>
-    <div class="tw">
-      <table>
-        <thead>
-          <tr>
-            <th class="c-cant">Cantidad</th>
-            <th class="c-modelo">Modelo</th>
-            <th class="c-ded">Deducible<br/>(UF)</th>
-            <th class="c-kms">Kms<br/>promedio</th>
-            <th class="c-plazo">Plazo<br/>(meses)</th>
-            <th class="c-tarifa">Tarifa Neta<br/>(UF)</th>
-            <th class="c-act"></th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-
-    <div class="table-footer">
-      <button class="btn btn-outline" onclick="agregarFila()">+ Agregar fila</button>
-    </div>
-
-    <div class="confirm-bar">
-      <span class="hint">
-        Deducible [0 / 5 / 10 UF] y plazo [12 / 24 / 36 / 48 meses] son opciones fijas.<br/>
-        Kms promedio y tarifa neta son variables — ingresar manualmente según el cliente.
-      </span>
-      <button class="btn btn-red" onclick="irAPreview()">Confirmar cotización →</button>
-    </div>
-
-  </div>
+<div id="app-bar">
+  <div class="brand">S<span class="dot">·</span>SUR<small>RENT A CAR</small></div>
+  <div id="status-bar">Sin solicitud vinculada</div>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost" onclick="resetDoc()">↺ Restablecer</button>
+  <button class="btn btn-green" onclick="exportarPDF()">⬇ Guardar PDF</button>
+  <button class="btn btn-rojo" id="btn-enviar" onclick="enviarCotizacion()">✉ Enviar</button>
 </div>
 
+<datalist id="dl-vehiculos"></datalist>
 
 <!-- ══════════════════════════════════════
-     VISTA 2: PREVIEW / EXPORT
+     DOCUMENTO A4
 ══════════════════════════════════════ -->
-<div id="view-preview" style="display:none">
+<div id="doc-wrapper">
+<div class="page">
 
-  <div class="preview-bar">
-    <button class="btn btn-outline" onclick="volverAEditar()">← Volver a editar</button>
-    <span class="hint">Los campos subrayados son editables en esta vista antes de exportar.</span>
-    <button class="btn btn-green" onclick="exportarPDF()">Exportar PDF</button>
-  </div>
+  <!-- ═══════════════════════════════════
+       SECCIÓN 1: CABECERA
+  ═══════════════════════════════════ -->
+  <header class="hdr">
+    <span class="sec-tag sec-tag-hdr">Sección 1 — Cabecera</span>
+    <div class="hdr-car"></div>
+    <div class="hdr-logo">
+      <div class="logo-box">
+        <div class="logo-main">S<span class="logo-dot">·</span>SUR</div>
+        <div class="logo-sub">RENT &nbsp; A &nbsp; CAR</div>
+      </div>
+    </div>
+    <div class="hdr-contact">
+      <span contenteditable="true" id="hdr-web">www.ssurrentacar.cl</span>
+      <span contenteditable="true" id="hdr-tel">600 600 4004</span>
+      <span contenteditable="true" id="hdr-social">ssurrentacar</span>
+    </div>
+  </header>
 
-  <div class="page">
+  <!-- ═══════════════════════════════════
+       SECCIÓN 2 (parte superior) + SECCIÓN 3
+       Todo contenido del documento
+  ═══════════════════════════════════ -->
+  <div class="doc">
 
-    <!-- Header S-Sur -->
-    <header class="hdr">
-      <div class="hdr-car"></div>
-      <div class="hdr-logo">
-        <div class="logo-box">
-          <div class="logo-main">S<span class="logo-dot">·</span>SUR</div>
-          <div class="logo-sub">RENT &nbsp; A &nbsp; CAR</div>
+    <!-- Fecha -->
+    <div class="doc-fecha">
+      <input type="text" id="p-fecha" class="f-doc" style="text-align:right; min-width:290px" />
+    </div>
+
+    <!-- Destinatario -->
+    <div class="doc-dest">
+      <strong>Sres.</strong><br/>
+      <strong>
+        <input type="text" id="p-dest" class="f-doc"
+               placeholder="Nombre empresa o cliente"
+               style="font-weight:700; min-width:270px" />
+      </strong><br/>
+      <strong>Presente:</strong>
+    </div>
+
+    <!-- Texto intro -->
+    <div class="doc-intro">
+      <p>De nuestra consideración:</p><br/>
+      <p class="text-edit" contenteditable="true" id="p-intro">En respuesta a lo solicitado, tenemos el agrado de informar nuestras tarifas <u><strong>referenciales</strong></u> de leasing operativo por los vehículos requeridos</p>
+    </div>
+
+    <!-- ═══════════════════════════════════
+         SECCIÓN 2: TABLA
+    ═══════════════════════════════════ -->
+    <div class="tabla-sec" id="tabla-sec">
+      <div class="tabla-toolbar" id="tabla-toolbar">
+        <span class="tabla-label">Vehículos cotizados</span>
+        <button class="btn-doc" id="btn-toggle" onclick="toggleTabla()">✎ Editar tabla</button>
+      </div>
+
+      <!-- Vista (read-only) -->
+      <div id="tabla-vista">
+        <div class="ptw">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:70px">Cantidad</th>
+                <th>Modelo</th>
+                <th style="width:85px">Deducible<br/>Neto (UF)</th>
+                <th style="width:88px">Kms<br/>promedio</th>
+                <th style="width:78px">Plazo<br/>(meses)</th>
+                <th style="width:88px">Tarifa Neta<br/>(UF)</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-vista"></tbody>
+          </table>
         </div>
       </div>
-      <div class="hdr-contact">
-        <span>www.ssurrentacar.cl</span>
-        <span>600 600 4004</span>
-        <span>ssurrentacar</span>
+
+      <!-- Editor (modo edición) -->
+      <div id="tabla-editor" style="display:none">
+        <div class="edit-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="c-cant">Cantidad</th>
+                <th class="c-modelo">Modelo</th>
+                <th class="c-ded">Deducible<br/>(UF)</th>
+                <th class="c-kms">Kms<br/>promedio</th>
+                <th class="c-plazo">Plazo<br/>(meses)</th>
+                <th class="c-tarifa">Tarifa Neta<br/>(UF)</th>
+                <th class="c-act"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-edit"></tbody>
+          </table>
+        </div>
+        <div class="edit-footer">
+          <button class="btn-doc add" onclick="agregarFila()">+ Agregar fila</button>
+          <span class="edit-hint">Deducible [0 / 5 / 10 UF] · Plazo [12 / 24 / 36 / 48 meses]</span>
+          <button class="btn-doc save" onclick="guardarTabla()">✓ Guardar tabla</button>
+        </div>
       </div>
-    </header>
+    </div>
 
-    <div class="doc">
+    <!-- ═══════════════════════════════════
+         SECCIÓN 3: CONDICIONES + FIRMA
+    ═══════════════════════════════════ -->
+    <div class="sec3-wrap">
+      <span class="sec-tag sec-tag-body">Sección 3 — Cuerpo / Pie</span>
 
-      <div class="doc-fecha">
-        <input type="text" id="p-fecha" class="editable" style="text-align:right; min-width:260px" />
-      </div>
-
-      <div class="doc-dest">
-        <strong>Sres.</strong><br/>
-        <strong><input type="text" id="p-dest" class="editable" style="font-weight:700; min-width:240px" /></strong><br/>
-        <strong>Presente:</strong>
-      </div>
-
-      <div class="doc-intro">
-        <p>De nuestra consideración:</p><br/>
-        <p>En respuesta a lo solicitado, tenemos el agrado de informar nuestras tarifas
-          <u><strong>referenciales</strong></u> de leasing operativo por los vehículos requeridos
-        </p>
-      </div>
-
-      <!-- Tabla read-only -->
-      <div class="ptw">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:70px">Cantidad</th>
-              <th>Modelo</th>
-              <th style="width:85px">Deducible<br/>Neto (UF)</th>
-              <th style="width:88px">Kms<br/>promedio</th>
-              <th style="width:78px">Plazo<br/>(meses)</th>
-              <th style="width:88px">Tarifa Neta<br/>(UF)</th>
-            </tr>
-          </thead>
-          <tbody id="tbody-preview"></tbody>
-        </table>
-      </div>
-
-      <!-- Condiciones -->
-      <div class="cond">
+      <div class="cond text-edit" contenteditable="true" id="p-cond">
         <p>Las tarifas están presentadas en valores netos mensuales, y se encuentran expresadas en unidades de fomento, contemplando los siguientes parámetros:</p>
         <ul>
           <li>Kilometraje promedio mensual: <span id="p-kms">3.000</span> km/mes.</li>
@@ -500,31 +523,23 @@
       <p style="margin-bottom:30px">Atenta a cualquier consulta, le saluda atentamente,</p>
 
       <div class="firma">
-        <input type="text" id="p-analista" class="editable firma-nombre" /><br/>
-        <span>Analista RAC</span><br/>
+        <input type="text" id="p-analista" class="f-doc" value="Michelle Aguero" /><br/>
+        <span contenteditable="true" id="p-cargo">Analista RAC</span><br/>
         <strong>S-Sur Ltda.</strong>
       </div>
+    </div>
 
-    </div><!-- /doc -->
-  </div><!-- /page -->
-</div><!-- /view-preview -->
-
-<!-- Datalist para sugerencias de modelos -->
-<datalist id="dl-vehiculos"></datalist>
+  </div><!-- /doc -->
+</div><!-- /page -->
+</div><!-- /doc-wrapper -->
 
 <script>
 /* ══════════════════════════════════════════
-   REGLAS DE NEGOCIO (reglas_cotizacion.md)
+   CONSTANTES
 ══════════════════════════════════════════ */
-const DEDUCIBLES = [0, 5, 10];       // UF — opciones FIJAS
-const PLAZOS     = [12, 24, 36, 48]; // meses — opciones FIJAS
-// Kms promedio : input numérico libre (VARIABLE por cliente)
-// Tarifa neta  : input texto libre  (VARIABLE por cliente)
+const DEDUCIBLES = [0, 5, 10];
+const PLAZOS     = [12, 24, 36, 48];
 
-/* ══════════════════════════════════════════
-   CATÁLOGO DE VEHÍCULOS (mock — luego vendrá de API)
-   Fuente: LISTADO UNIDADES RAC.xlsx
-══════════════════════════════════════════ */
 const CATALOGO = [
   'CHEVROLET MONTANA 1.2T LT MT S',
   'CHEVROLET MONTANA 1.2T PREMIER MT S',
@@ -540,17 +555,23 @@ const CATALOGO = [
   'BYD SHARK 1.5T HYBRID 4X4 AT',
 ];
 
+const API_BASE = window.NUBUX_API || '';
+
 /* ══════════════════════════════════════════
-   INIT
+   ESTADO
 ══════════════════════════════════════════ */
 let rowCount = 0;
 let solicitudId = null;
+let tablaEnEdicion = false;
 
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   solicitudId = params.get('id') || null;
 
-  document.getElementById('meta-fecha').value = fechaTexto();
+  document.getElementById('p-fecha').value = fechaTexto();
   poblarDatalist();
 
   if (solicitudId) {
@@ -559,94 +580,183 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     setStatus('Sin solicitud vinculada — datos de ejemplo', '');
     mockFilas();
+    renderVista();
   }
 });
 
+// Antes de imprimir: cerrar editor de tabla si está abierto
+window.addEventListener('beforeprint', () => {
+  if (tablaEnEdicion) guardarTabla();
+});
+
 /* ══════════════════════════════════════════
-   INTEGRACIÓN CON SISTEMA EXTERNO (Nubux)
-
-   Cuando llegue el usuario con ?id=XXX:
-   1. GET  {API_BASE}/solicitudes/XXX   → pre-carga la tabla
-   2. POST {API_BASE}/solicitudes/XXX/cotizacion → al exportar PDF
-
-   Adaptar aplicarDatos() al shape real de la respuesta.
+   INTEGRACIÓN NUBUX
 ══════════════════════════════════════════ */
-const API_BASE = window.NUBUX_API || ''; // Sobreescribir desde config o ENV
-
 async function cargarSolicitud(id) {
   try {
     const r = await fetch(`${API_BASE}/solicitudes/${id}`, { headers: { Accept: 'application/json' } });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
     aplicarDatos(data);
+    renderVista();
     setStatus(`Solicitud #${id} cargada`, 'ok');
   } catch (e) {
     console.warn('API no disponible:', e.message);
-    setStatus(`API no disponible — usando datos de ejemplo`, 'warn');
+    setStatus('API no disponible — datos de ejemplo', 'warn');
     mockFilas();
+    renderVista();
   }
 }
 
-/**
- * Adaptar al shape real de Nubux cuando se conozca.
- * Se esperan campos como:
- *   data.empresa | data.cliente | data.razon_social
- *   data.vehiculos[] { modelo, cantidad, kms?, deducible?, plazo? }
- */
 function aplicarDatos(data) {
-  document.getElementById('meta-dest').value =
+  document.getElementById('p-dest').value =
     data.empresa ?? data.cliente ?? data.razon_social ?? '';
 
   const items = data.vehiculos ?? data.items ?? [];
   if (items.length === 0) { agregarFila(); return; }
 
   items.forEach(v => agregarFila({
-    cantidad : v.cantidad  ?? 1,
-    modelo   : v.modelo    ?? v.nombre ?? '',
-    deducible: v.deducible ?? 5,
+    cantidad : v.cantidad        ?? 1,
+    modelo   : v.modelo ?? v.nombre ?? '',
+    deducible: v.deducible       ?? 5,
     kms      : v.kms_promedio ?? v.kms ?? 3000,
-    plazo    : v.plazo     ?? 36,
-    tarifa   : v.tarifa    ?? '',
+    plazo    : v.plazo           ?? 36,
+    tarifa   : v.tarifa          ?? '',
   }));
 }
 
 /* ══════════════════════════════════════════
-   AGREGAR FILA
+   TOGGLE TABLA
+══════════════════════════════════════════ */
+function toggleTabla() {
+  if (tablaEnEdicion) {
+    guardarTabla();
+  } else {
+    abrirEditor();
+  }
+}
+
+function abrirEditor() {
+  tablaEnEdicion = true;
+  document.getElementById('tabla-vista').style.display  = 'none';
+  document.getElementById('tabla-editor').style.display = 'block';
+  document.getElementById('tabla-sec').classList.add('editando');
+  const btn = document.getElementById('btn-toggle');
+  btn.textContent = '← Cerrar editor';
+  btn.classList.remove('save');
+}
+
+function guardarTabla() {
+  const filas = leerFilas();
+
+  // Sincronizar kms y plazo en el texto de condiciones
+  if (filas.length > 0) {
+    const kmsEl   = document.getElementById('p-kms');
+    const plazoEl = document.getElementById('p-plazo');
+    if (kmsEl)   kmsEl.textContent   = Number(filas[0].kms).toLocaleString('es-CL');
+    if (plazoEl) plazoEl.textContent = filas[0].plazo;
+  }
+
+  renderVista();
+  tablaEnEdicion = false;
+  document.getElementById('tabla-vista').style.display  = 'block';
+  document.getElementById('tabla-editor').style.display = 'none';
+  document.getElementById('tabla-sec').classList.remove('editando');
+  const btn = document.getElementById('btn-toggle');
+  btn.textContent = '✎ Editar tabla';
+  btn.classList.remove('save');
+}
+
+/* ══════════════════════════════════════════
+   RENDER TABLA VISTA (read-only en documento)
+══════════════════════════════════════════ */
+function renderVista() {
+  const filas = leerFilas();
+  const tbody = document.getElementById('tbody-vista');
+  tbody.innerHTML = '';
+
+  if (filas.length === 0) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 6;
+    td.style.cssText = 'text-align:center; color:#aaa; padding:18px; font-style:italic; font-size:12px;';
+    td.textContent = 'Sin vehículos. Clic en "Editar tabla" para agregar.';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  // Agrupar filas consecutivas con misma cantidad (rowspan)
+  const grupos = [];
+  filas.forEach(f => {
+    const last = grupos[grupos.length - 1];
+    if (last && last.cant === f.cantidad) last.items.push(f);
+    else grupos.push({ cant: f.cantidad, items: [f] });
+  });
+
+  grupos.forEach(g => {
+    g.items.forEach((item, i) => {
+      const tr = document.createElement('tr');
+
+      if (i === 0) {
+        const tdC = document.createElement('td');
+        tdC.className = 'td-cant';
+        tdC.textContent = g.cant;
+        tdC.rowSpan = g.items.length;
+        if (g.items.length > 1) tdC.style.verticalAlign = 'middle';
+        tr.appendChild(tdC);
+      }
+
+      const tdM = document.createElement('td'); tdM.className = 'td-mod'; tdM.textContent = item.modelo;
+      const tdD = document.createElement('td'); tdD.textContent = item.deducible;
+      const tdK = document.createElement('td'); tdK.textContent = Number(item.kms).toLocaleString('es-CL');
+      const tdP = document.createElement('td'); tdP.textContent = item.plazo;
+      const tdT = document.createElement('td'); tdT.style.fontWeight = '700';
+
+      if (item.tarifa !== '') {
+        const n = parseFloat(item.tarifa.replace(',', '.'));
+        tdT.textContent = isNaN(n)
+          ? item.tarifa
+          : n.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      } else {
+        tdT.textContent = '—';
+        tdT.style.color = '#aaa';
+      }
+
+      tr.append(tdM, tdD, tdK, tdP, tdT);
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+/* ══════════════════════════════════════════
+   AGREGAR FILA (tabla editor)
 ══════════════════════════════════════════ */
 function agregarFila(d = {}) {
   const id    = ++rowCount;
-  const tbody = document.getElementById('tbody');
+  const tbody = document.getElementById('tbody-edit');
   const tr    = document.createElement('tr');
   tr.dataset.id = id;
 
-  /* Cantidad */
   const inCant = mk('input', { type: 'number', min: 1, value: d.cantidad ?? 1 });
   inCant.dataset.c = 'cant';
 
-  /* Modelo — texto libre con datalist para sugerencias */
   const inMod = mk('input', { type: 'text', placeholder: 'Escribir o seleccionar modelo…', list: 'dl-vehiculos', value: d.modelo ?? '' });
   inMod.dataset.c = 'modelo';
-  inMod.style.textAlign = 'left';
 
-  /* Deducible — select fijo [0, 5, 10] */
   const selDed = mkSelect(DEDUCIBLES.map(v => ({ v, t: `${v} UF` })), d.deducible ?? 5);
   selDed.dataset.c = 'ded';
 
-  /* Kms promedio — input libre */
   const inKms = mk('input', { type: 'number', min: 100, step: 100, value: d.kms ?? 3000 });
   inKms.dataset.c = 'kms';
-  inKms.className = 'f-kms';
 
-  /* Plazo — select fijo [12, 24, 36, 48] */
   const selPlazo = mkSelect(PLAZOS.map(v => ({ v, t: `${v} m.` })), d.plazo ?? 36);
   selPlazo.dataset.c = 'plazo';
 
-  /* Tarifa neta — input libre (manual por cliente) */
   const inTarifa = mk('input', { type: 'text', inputMode: 'decimal', placeholder: '0,0', value: d.tarifa ?? '' });
   inTarifa.dataset.c = 'tarifa';
   inTarifa.className = 'f-tarifa';
 
-  /* Botón eliminar */
   const btnRm = document.createElement('button');
   btnRm.className = 'btn-rm';
   btnRm.title = 'Eliminar fila';
@@ -664,8 +774,6 @@ function agregarFila(d = {}) {
   );
 
   tbody.appendChild(tr);
-
-  // Foco en modelo si fila vacía
   if (!d.modelo) inMod.focus();
 }
 
@@ -673,8 +781,8 @@ function agregarFila(d = {}) {
    LEER FILAS
 ══════════════════════════════════════════ */
 function leerFilas() {
-  return Array.from(document.querySelectorAll('#tbody tr')).map(tr => {
-    const g = campo => tr.querySelector(`[data-c="${campo}"]`)?.value ?? '';
+  return Array.from(document.querySelectorAll('#tbody-edit tr')).map(tr => {
+    const g = c => tr.querySelector(`[data-c="${c}"]`)?.value ?? '';
     return {
       cantidad : parseInt(g('cant'))  || 1,
       modelo   : g('modelo').trim(),
@@ -687,122 +795,107 @@ function leerFilas() {
 }
 
 /* ══════════════════════════════════════════
-   PASAR A PREVIEW
-══════════════════════════════════════════ */
-function irAPreview() {
-  const filas = leerFilas();
-
-  if (filas.length === 0) {
-    alert('Agregue al menos una fila antes de confirmar.');
-    return;
-  }
-  if (filas.some(f => !f.modelo)) {
-    alert('Hay filas sin modelo. Complete todos los campos antes de confirmar.');
-    return;
-  }
-  if (filas.some(f => !f.tarifa)) {
-    if (!confirm('Hay filas sin tarifa neta ingresada. ¿Desea continuar de todas formas?')) return;
-  }
-
-  // Sincronizar campos editables del doc
-  document.getElementById('p-fecha').value    = document.getElementById('meta-fecha').value;
-  document.getElementById('p-dest').value     = document.getElementById('meta-dest').value;
-  document.getElementById('p-analista').value = document.getElementById('meta-analista').value;
-
-  renderTablaPreview(filas);
-
-  // Resumen en condiciones (tomar primer item como referencia)
-  document.getElementById('p-kms').textContent   = Number(filas[0].kms).toLocaleString('es-CL');
-  document.getElementById('p-plazo').textContent = filas[0].plazo;
-
-  document.getElementById('view-editar').style.display  = 'none';
-  document.getElementById('view-preview').style.display = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ══════════════════════════════════════════
-   RENDERIZAR TABLA PREVIEW (con rowspan en Cantidad)
-   Agrupa filas consecutivas con la misma cantidad,
-   igual que el PDF modelo.
-══════════════════════════════════════════ */
-function renderTablaPreview(filas) {
-  const tbody = document.getElementById('tbody-preview');
-  tbody.innerHTML = '';
-
-  // Agrupar filas consecutivas por cantidad
-  const grupos = [];
-  filas.forEach(f => {
-    const last = grupos[grupos.length - 1];
-    if (last && last.cant === f.cantidad) {
-      last.items.push(f);
-    } else {
-      grupos.push({ cant: f.cantidad, items: [f] });
-    }
-  });
-
-  grupos.forEach(g => {
-    g.items.forEach((item, i) => {
-      const tr = document.createElement('tr');
-
-      if (i === 0) {
-        const tdC = document.createElement('td');
-        tdC.className = 'td-cant';
-        tdC.textContent = g.cant;
-        tdC.rowSpan = g.items.length;
-        if (g.items.length > 1) tdC.style.verticalAlign = 'middle';
-        tr.appendChild(tdC);
-      }
-
-      const tdM = document.createElement('td');
-      tdM.className = 'td-mod';
-      tdM.textContent = item.modelo;
-
-      const tdD = document.createElement('td');
-      tdD.textContent = item.deducible;
-
-      const tdK = document.createElement('td');
-      tdK.textContent = Number(item.kms).toLocaleString('es-CL');
-
-      const tdP = document.createElement('td');
-      tdP.textContent = item.plazo;
-
-      const tdT = document.createElement('td');
-      tdT.style.fontWeight = '700';
-      if (item.tarifa !== '') {
-        const n = parseFloat(item.tarifa.replace(',', '.'));
-        tdT.textContent = isNaN(n) ? item.tarifa : n.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-      } else {
-        tdT.textContent = '—';
-        tdT.style.color = '#aaa';
-      }
-
-      tr.append(tdM, tdD, tdK, tdP, tdT);
-      tbody.appendChild(tr);
-    });
-  });
-}
-
-/* ══════════════════════════════════════════
-   VOLVER A EDITAR
-══════════════════════════════════════════ */
-function volverAEditar() {
-  document.getElementById('view-preview').style.display = 'none';
-  document.getElementById('view-editar').style.display  = 'block';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* ══════════════════════════════════════════
    EXPORTAR PDF
-   Usa window.print() + CSS @media print.
-   TODO: tras imprimir, notificar a Nubux vía notificarNubux().
 ══════════════════════════════════════════ */
 function exportarPDF() {
   window.print();
-  // notificarNubux(solicitudId, leerFilas()); // descomentar al integrar
 }
 
 /* ══════════════════════════════════════════
-   NOTIFICAR A NUBUX (placeholder para integración)
+   ENVIAR COTIZACIÓN — POST al endpoint Nubux
+   Reemplazar ENDPOINT_ENVIO con la URL real
+   cuando la proporcionen.
+══════════════════════════════════════════ */
+const ENDPOINT_ENVIO = ''; // <- pegar URL aquí
+
+async function enviarCotizacion() {
+  if (!ENDPOINT_ENVIO) {
+    alert('Endpoint de envío no configurado aún.');
+    return;
+  }
+
+  if (tablaEnEdicion) guardarTabla();
+
+  const filas = leerFilas();
+  if (filas.length === 0) {
+    alert('No hay vehículos en la cotización. Agregue al menos uno antes de enviar.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+  setStatus('Enviando cotización…', 'warn');
+
+  const payload = {
+    solicitudId  : solicitudId,
+    fecha        : document.getElementById('p-fecha').value,
+    destinatario : document.getElementById('p-dest').value,
+    analista     : document.getElementById('p-analista').value,
+    contacto: {
+      web    : document.getElementById('hdr-web').textContent.trim(),
+      telefono: document.getElementById('hdr-tel').textContent.trim(),
+      social : document.getElementById('hdr-social').textContent.trim(),
+    },
+    items        : filas,
+    timestamp    : new Date().toISOString(),
+  };
+
+  try {
+    const r = await fetch(ENDPOINT_ENVIO, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(payload),
+    });
+
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    setStatus('Cotización enviada ✓', 'ok');
+    btn.textContent = '✉ Enviar';
+    btn.disabled = false;
+  } catch (e) {
+    console.error('Error al enviar:', e.message);
+    setStatus('Error al enviar — ver consola', 'warn');
+    btn.textContent = '✉ Enviar';
+    btn.disabled = false;
+    alert(`No se pudo enviar la cotización.\n${e.message}`);
+  }
+}
+
+/* ══════════════════════════════════════════
+   RESET DOCUMENTO
+══════════════════════════════════════════ */
+function resetDoc() {
+  if (!confirm('¿Restablecer el documento a los valores por defecto?')) return;
+
+  document.getElementById('p-fecha').value    = fechaTexto();
+  document.getElementById('p-dest').value     = '';
+  document.getElementById('p-analista').value = 'Michelle Aguero';
+  document.getElementById('p-cargo').textContent = 'Analista RAC';
+  document.getElementById('p-intro').innerHTML =
+    'En respuesta a lo solicitado, tenemos el agrado de informar nuestras tarifas <u><strong>referenciales</strong></u> de leasing operativo por los vehículos requeridos';
+  document.getElementById('hdr-web').textContent    = 'www.ssurrentacar.cl';
+  document.getElementById('hdr-tel').textContent    = '600 600 4004';
+  document.getElementById('hdr-social').textContent = 'ssurrentacar';
+
+  document.getElementById('tbody-edit').innerHTML = '';
+  rowCount = 0;
+
+  if (tablaEnEdicion) {
+    tablaEnEdicion = false;
+    document.getElementById('tabla-sec').classList.remove('editando');
+    document.getElementById('tabla-editor').style.display = 'none';
+    document.getElementById('tabla-vista').style.display  = 'block';
+    document.getElementById('btn-toggle').textContent = '✎ Editar tabla';
+  }
+
+  mockFilas();
+  renderVista();
+  setStatus('Documento restablecido', '');
+}
+
+/* ══════════════════════════════════════════
+   NOTIFICAR NUBUX (placeholder)
 ══════════════════════════════════════════ */
 async function notificarNubux(id, filas) {
   if (!id || !API_BASE) return;
@@ -867,7 +960,7 @@ function poblarDatalist() {
 function setStatus(msg, tipo) {
   const el = document.getElementById('status-bar');
   el.textContent = msg;
-  el.className = `status-bar${tipo ? ' ' + tipo : ''}`;
+  el.className = tipo || '';
 }
 
 function fechaTexto() {
@@ -878,7 +971,7 @@ function fechaTexto() {
 }
 
 /* ══════════════════════════════════════════
-   DATOS MOCK — para desarrollo sin API
+   DATOS MOCK (desarrollo sin API)
 ══════════════════════════════════════════ */
 function mockFilas() {
   [
