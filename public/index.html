@@ -287,13 +287,14 @@
     .edit-wrap tbody td:last-child { border-right: none; }
     .edit-wrap tbody tr:last-child td { border-bottom: none; }
 
-    .c-cant   { width: 68px; }
-    .c-modelo { }
-    .c-ded    { width: 88px; }
-    .c-kms    { width: 88px; }
-    .c-plazo  { width: 86px; }
-    .c-tarifa { width: 92px; }
-    .c-act    { width: 34px; }
+    .c-cant       { width: 56px; }
+    .c-modelo     { }
+    .c-ded        { width: 78px; }
+    .c-kms        { width: 78px; }
+    .c-plazo      { width: 72px; }
+    .c-tarifa     { width: 78px; }
+    .c-tarifa-clp { width: 96px; }
+    .c-act        { width: 34px; }
 
     .edit-wrap td input,
     .edit-wrap td select {
@@ -312,6 +313,61 @@
       font-size: 15px; padding: 3px 7px; border-radius: 3px; display: block; margin: auto;
     }
     .btn-rm:hover { background: #fde8e8; }
+
+    /* Barra valor UF (solo en modo edición) */
+    .valoruf-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 2px 10px; font-size: 12px; color: var(--azul-med); font-weight: 700;
+      border-bottom: 1px solid var(--borde); margin-bottom: 8px;
+    }
+    .valoruf-bar label { display: flex; align-items: center; gap: 4px; }
+    .valoruf-bar input {
+      width: 120px; padding: 4px 7px; border: 1px solid var(--borde);
+      border-radius: 3px; font-size: 12px; font-family: var(--font);
+      text-align: right; font-weight: 700; color: var(--azul-med);
+    }
+    .valoruf-bar input:focus { border-color: var(--azul-med); outline: none; }
+    .valoruf-hint { font-size: 10px; color: #999; font-weight: 400; }
+
+    /* Sub-líneas de cálculo dentro de celdas */
+    .tarifa-calc { font-size: 10px; line-height: 1.5; text-align: center; margin-top: 3px; }
+    .tarifa-calc .tc-clp { color: var(--azul-med); font-weight: 700; display: block; }
+    .tarifa-calc .tc-km  { color: #888; display: block; }
+
+    /* ══════════════════════════════════════
+       AUTOCOMPLETE VEHÍCULOS
+    ══════════════════════════════════════ */
+    .ac-wrap { position: relative; width: 100%; }
+    .ac-wrap input {
+      width: 100%; padding: 5px; border: 1px solid var(--borde);
+      border-radius: 3px; font-size: 12px; font-family: var(--font); background: #fff;
+    }
+    .ac-wrap input:focus { border-color: var(--azul-med); outline: none; }
+    .ac-list {
+      display: none;
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: #fff;
+      border: 1.5px solid var(--azul-med);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      max-height: 210px;
+      overflow-y: auto;
+      z-index: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .ac-list.visible { display: block; }
+    .ac-item {
+      padding: 6px 9px;
+      font-size: 12px;
+      font-family: var(--font);
+      cursor: pointer;
+      border-bottom: 1px solid var(--borde);
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover, .ac-item.active { background: #eef2f8; color: var(--azul); }
+    .ac-item mark { background: #fff3a3; color: inherit; font-weight: 700; }
+    .ac-empty { padding: 8px 9px; color: #aaa; font-size: 12px; font-style: italic; }
 
     .edit-footer {
       display: flex; align-items: center; gap: 8px;
@@ -356,6 +412,7 @@
         outline: none !important;
         background: transparent !important;
       }
+      .valoruf-bar { display: none !important; }
     }
   </style>
 </head>
@@ -372,8 +429,6 @@
   <button class="btn btn-green" onclick="exportarPDF()">⬇ Guardar PDF</button>
   <button class="btn btn-rojo" id="btn-enviar" onclick="enviarCotizacion()">✉ Enviar</button>
 </div>
-
-<datalist id="dl-vehiculos"></datalist>
 
 <!-- ══════════════════════════════════════
      DOCUMENTO A4
@@ -413,18 +468,18 @@
 
     <!-- Destinatario -->
     <div class="doc-dest">
-      <strong>Sres.</strong><br/>
+      <strong><span class="text-edit" contenteditable="true" id="p-sres">Sres.</span></strong><br/>
       <strong>
         <input type="text" id="p-dest" class="f-doc"
                placeholder="Nombre empresa o cliente"
                style="font-weight:700; min-width:270px" />
       </strong><br/>
-      <strong>Presente:</strong>
+      <strong><span class="text-edit" contenteditable="true" id="p-presente">Presente:</span></strong>
     </div>
 
     <!-- Texto intro -->
     <div class="doc-intro">
-      <p>De nuestra consideración:</p><br/>
+      <p class="text-edit" contenteditable="true" id="p-consideracion">De nuestra consideración:</p><br/>
       <p class="text-edit" contenteditable="true" id="p-intro">En respuesta a lo solicitado, tenemos el agrado de informar nuestras tarifas <u><strong>referenciales</strong></u> de leasing operativo por los vehículos requeridos</p>
     </div>
 
@@ -443,12 +498,13 @@
           <table>
             <thead>
               <tr>
-                <th style="width:70px">Cantidad</th>
+                <th style="width:60px">Cantidad</th>
                 <th>Modelo</th>
-                <th style="width:85px">Deducible<br/>Neto (UF)</th>
-                <th style="width:88px">Kms<br/>promedio</th>
-                <th style="width:78px">Plazo<br/>(meses)</th>
-                <th style="width:88px">Tarifa Neta<br/>(UF)</th>
+                <th style="width:78px">Deducible<br/>Neto (UF)</th>
+                <th style="width:82px">Kms<br/>promedio</th>
+                <th style="width:72px">Plazo<br/>(meses)</th>
+                <th style="width:82px">Tarifa<br/>(UF)</th>
+                <th style="width:96px">Tarifa<br/>mensual ($)</th>
               </tr>
             </thead>
             <tbody id="tbody-vista"></tbody>
@@ -458,6 +514,10 @@
 
       <!-- Editor (modo edición) -->
       <div id="tabla-editor" style="display:none">
+        <div class="valoruf-bar">
+          <label>Valor UF: $<input type="number" id="inp-valoruf" min="0" step="100" placeholder="0" /></label>
+          <span class="valoruf-hint">Ingrese el valor actual de la UF para calcular precios en $</span>
+        </div>
         <div class="edit-wrap">
           <table>
             <thead>
@@ -467,7 +527,8 @@
                 <th class="c-ded">Deducible<br/>(UF)</th>
                 <th class="c-kms">Kms<br/>promedio</th>
                 <th class="c-plazo">Plazo<br/>(meses)</th>
-                <th class="c-tarifa">Tarifa Neta<br/>(UF)</th>
+                <th class="c-tarifa">Tarifa<br/>(UF)</th>
+                <th class="c-tarifa-clp">Tarifa $<br/><small style="font-weight:400;opacity:.8">y $/km</small></th>
                 <th class="c-act"></th>
               </tr>
             </thead>
@@ -520,12 +581,12 @@
         </ul>
       </div>
 
-      <p style="margin-bottom:30px">Atenta a cualquier consulta, le saluda atentamente,</p>
+      <p class="text-edit" contenteditable="true" id="p-despedida" style="margin-bottom:30px">Atenta a cualquier consulta, le saluda atentamente,</p>
 
       <div class="firma">
         <input type="text" id="p-analista" class="f-doc" value="Michelle Aguero" /><br/>
         <span contenteditable="true" id="p-cargo">Analista RAC</span><br/>
-        <strong>S-Sur Ltda.</strong>
+        <strong><span class="text-edit" contenteditable="true" id="p-empresa">S-Sur Ltda.</span></strong>
       </div>
     </div>
 
@@ -533,457 +594,6 @@
 </div><!-- /page -->
 </div><!-- /doc-wrapper -->
 
-<script>
-/* ══════════════════════════════════════════
-   CONSTANTES
-══════════════════════════════════════════ */
-const DEDUCIBLES = [0, 5, 10];
-const PLAZOS     = [12, 24, 36, 48];
-
-const CATALOGO = [
-  'CHEVROLET MONTANA 1.2T LT MT S',
-  'CHEVROLET MONTANA 1.2T PREMIER MT S',
-  'MAXUS T60 4X2 DX MT E6',
-  'GREAT WALL POER 2.0 TD 4X2 ELITE F2',
-  'CHEVROLET COLORADO 2.8TD LTZ AT 4WD S',
-  'CHEVROLET COLORADO 2.8TD HC AT 4WD S',
-  'FORD RANGER DSL XLT 4X4 2.0L AT',
-  'TOYOTA HILUX SR 2.4L 4X4 MT',
-  'NISSAN FRONTIER 2.5L 4X4 MT',
-  'VOLKSWAGEN AMAROK 3.0 V6 TDI 4X4 AT',
-  'JAC T9 2.0T 4X4 AT',
-  'BYD SHARK 1.5T HYBRID 4X4 AT',
-];
-
-const API_BASE = window.NUBUX_API || '';
-
-/* ══════════════════════════════════════════
-   ESTADO
-══════════════════════════════════════════ */
-let rowCount = 0;
-let solicitudId = null;
-let tablaEnEdicion = false;
-
-/* ══════════════════════════════════════════
-   INIT
-══════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', async () => {
-  const params = new URLSearchParams(window.location.search);
-  solicitudId = params.get('id') || null;
-
-  document.getElementById('p-fecha').value = fechaTexto();
-  poblarDatalist();
-
-  if (solicitudId) {
-    setStatus(`Cargando solicitud #${solicitudId}…`, 'warn');
-    await cargarSolicitud(solicitudId);
-  } else {
-    setStatus('Sin solicitud vinculada — datos de ejemplo', '');
-    mockFilas();
-    renderVista();
-  }
-});
-
-// Antes de imprimir: cerrar editor de tabla si está abierto
-window.addEventListener('beforeprint', () => {
-  if (tablaEnEdicion) guardarTabla();
-});
-
-/* ══════════════════════════════════════════
-   INTEGRACIÓN NUBUX
-══════════════════════════════════════════ */
-async function cargarSolicitud(id) {
-  try {
-    const r = await fetch(`${API_BASE}/solicitudes/${id}`, { headers: { Accept: 'application/json' } });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
-    aplicarDatos(data);
-    renderVista();
-    setStatus(`Solicitud #${id} cargada`, 'ok');
-  } catch (e) {
-    console.warn('API no disponible:', e.message);
-    setStatus('API no disponible — datos de ejemplo', 'warn');
-    mockFilas();
-    renderVista();
-  }
-}
-
-function aplicarDatos(data) {
-  document.getElementById('p-dest').value =
-    data.empresa ?? data.cliente ?? data.razon_social ?? '';
-
-  const items = data.vehiculos ?? data.items ?? [];
-  if (items.length === 0) { agregarFila(); return; }
-
-  items.forEach(v => agregarFila({
-    cantidad : v.cantidad        ?? 1,
-    modelo   : v.modelo ?? v.nombre ?? '',
-    deducible: v.deducible       ?? 5,
-    kms      : v.kms_promedio ?? v.kms ?? 3000,
-    plazo    : v.plazo           ?? 36,
-    tarifa   : v.tarifa          ?? '',
-  }));
-}
-
-/* ══════════════════════════════════════════
-   TOGGLE TABLA
-══════════════════════════════════════════ */
-function toggleTabla() {
-  if (tablaEnEdicion) {
-    guardarTabla();
-  } else {
-    abrirEditor();
-  }
-}
-
-function abrirEditor() {
-  tablaEnEdicion = true;
-  document.getElementById('tabla-vista').style.display  = 'none';
-  document.getElementById('tabla-editor').style.display = 'block';
-  document.getElementById('tabla-sec').classList.add('editando');
-  const btn = document.getElementById('btn-toggle');
-  btn.textContent = '← Cerrar editor';
-  btn.classList.remove('save');
-}
-
-function guardarTabla() {
-  const filas = leerFilas();
-
-  // Sincronizar kms y plazo en el texto de condiciones
-  if (filas.length > 0) {
-    const kmsEl   = document.getElementById('p-kms');
-    const plazoEl = document.getElementById('p-plazo');
-    if (kmsEl)   kmsEl.textContent   = Number(filas[0].kms).toLocaleString('es-CL');
-    if (plazoEl) plazoEl.textContent = filas[0].plazo;
-  }
-
-  renderVista();
-  tablaEnEdicion = false;
-  document.getElementById('tabla-vista').style.display  = 'block';
-  document.getElementById('tabla-editor').style.display = 'none';
-  document.getElementById('tabla-sec').classList.remove('editando');
-  const btn = document.getElementById('btn-toggle');
-  btn.textContent = '✎ Editar tabla';
-  btn.classList.remove('save');
-}
-
-/* ══════════════════════════════════════════
-   RENDER TABLA VISTA (read-only en documento)
-══════════════════════════════════════════ */
-function renderVista() {
-  const filas = leerFilas();
-  const tbody = document.getElementById('tbody-vista');
-  tbody.innerHTML = '';
-
-  if (filas.length === 0) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 6;
-    td.style.cssText = 'text-align:center; color:#aaa; padding:18px; font-style:italic; font-size:12px;';
-    td.textContent = 'Sin vehículos. Clic en "Editar tabla" para agregar.';
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-    return;
-  }
-
-  // Agrupar filas consecutivas con misma cantidad (rowspan)
-  const grupos = [];
-  filas.forEach(f => {
-    const last = grupos[grupos.length - 1];
-    if (last && last.cant === f.cantidad) last.items.push(f);
-    else grupos.push({ cant: f.cantidad, items: [f] });
-  });
-
-  grupos.forEach(g => {
-    g.items.forEach((item, i) => {
-      const tr = document.createElement('tr');
-
-      if (i === 0) {
-        const tdC = document.createElement('td');
-        tdC.className = 'td-cant';
-        tdC.textContent = g.cant;
-        tdC.rowSpan = g.items.length;
-        if (g.items.length > 1) tdC.style.verticalAlign = 'middle';
-        tr.appendChild(tdC);
-      }
-
-      const tdM = document.createElement('td'); tdM.className = 'td-mod'; tdM.textContent = item.modelo;
-      const tdD = document.createElement('td'); tdD.textContent = item.deducible;
-      const tdK = document.createElement('td'); tdK.textContent = Number(item.kms).toLocaleString('es-CL');
-      const tdP = document.createElement('td'); tdP.textContent = item.plazo;
-      const tdT = document.createElement('td'); tdT.style.fontWeight = '700';
-
-      if (item.tarifa !== '') {
-        const n = parseFloat(item.tarifa.replace(',', '.'));
-        tdT.textContent = isNaN(n)
-          ? item.tarifa
-          : n.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-      } else {
-        tdT.textContent = '—';
-        tdT.style.color = '#aaa';
-      }
-
-      tr.append(tdM, tdD, tdK, tdP, tdT);
-      tbody.appendChild(tr);
-    });
-  });
-}
-
-/* ══════════════════════════════════════════
-   AGREGAR FILA (tabla editor)
-══════════════════════════════════════════ */
-function agregarFila(d = {}) {
-  const id    = ++rowCount;
-  const tbody = document.getElementById('tbody-edit');
-  const tr    = document.createElement('tr');
-  tr.dataset.id = id;
-
-  const inCant = mk('input', { type: 'number', min: 1, value: d.cantidad ?? 1 });
-  inCant.dataset.c = 'cant';
-
-  const inMod = mk('input', { type: 'text', placeholder: 'Escribir o seleccionar modelo…', list: 'dl-vehiculos', value: d.modelo ?? '' });
-  inMod.dataset.c = 'modelo';
-
-  const selDed = mkSelect(DEDUCIBLES.map(v => ({ v, t: `${v} UF` })), d.deducible ?? 5);
-  selDed.dataset.c = 'ded';
-
-  const inKms = mk('input', { type: 'number', min: 100, step: 100, value: d.kms ?? 3000 });
-  inKms.dataset.c = 'kms';
-
-  const selPlazo = mkSelect(PLAZOS.map(v => ({ v, t: `${v} m.` })), d.plazo ?? 36);
-  selPlazo.dataset.c = 'plazo';
-
-  const inTarifa = mk('input', { type: 'text', inputMode: 'decimal', placeholder: '0,0', value: d.tarifa ?? '' });
-  inTarifa.dataset.c = 'tarifa';
-  inTarifa.className = 'f-tarifa';
-
-  const btnRm = document.createElement('button');
-  btnRm.className = 'btn-rm';
-  btnRm.title = 'Eliminar fila';
-  btnRm.innerHTML = '&#x2715;';
-  btnRm.onclick = () => tr.remove();
-
-  tr.append(
-    wrapTd('c-cant',   inCant),
-    wrapTd('c-modelo', inMod),
-    wrapTd('c-ded',    selDed),
-    wrapTd('c-kms',    inKms),
-    wrapTd('c-plazo',  selPlazo),
-    wrapTd('c-tarifa', inTarifa),
-    wrapTd('c-act',    btnRm)
-  );
-
-  tbody.appendChild(tr);
-  if (!d.modelo) inMod.focus();
-}
-
-/* ══════════════════════════════════════════
-   LEER FILAS
-══════════════════════════════════════════ */
-function leerFilas() {
-  return Array.from(document.querySelectorAll('#tbody-edit tr')).map(tr => {
-    const g = c => tr.querySelector(`[data-c="${c}"]`)?.value ?? '';
-    return {
-      cantidad : parseInt(g('cant'))  || 1,
-      modelo   : g('modelo').trim(),
-      deducible: parseFloat(g('ded')),
-      kms      : parseInt(g('kms'))   || 3000,
-      plazo    : parseInt(g('plazo')),
-      tarifa   : g('tarifa').trim(),
-    };
-  });
-}
-
-/* ══════════════════════════════════════════
-   EXPORTAR PDF
-══════════════════════════════════════════ */
-function exportarPDF() {
-  window.print();
-}
-
-/* ══════════════════════════════════════════
-   ENVIAR COTIZACIÓN — POST al endpoint Nubux
-   Reemplazar ENDPOINT_ENVIO con la URL real
-   cuando la proporcionen.
-══════════════════════════════════════════ */
-const ENDPOINT_ENVIO = ''; // <- pegar URL aquí
-
-async function enviarCotizacion() {
-  if (!ENDPOINT_ENVIO) {
-    alert('Endpoint de envío no configurado aún.');
-    return;
-  }
-
-  if (tablaEnEdicion) guardarTabla();
-
-  const filas = leerFilas();
-  if (filas.length === 0) {
-    alert('No hay vehículos en la cotización. Agregue al menos uno antes de enviar.');
-    return;
-  }
-
-  const btn = document.getElementById('btn-enviar');
-  btn.disabled = true;
-  btn.textContent = 'Enviando…';
-  setStatus('Enviando cotización…', 'warn');
-
-  const payload = {
-    solicitudId  : solicitudId,
-    fecha        : document.getElementById('p-fecha').value,
-    destinatario : document.getElementById('p-dest').value,
-    analista     : document.getElementById('p-analista').value,
-    contacto: {
-      web    : document.getElementById('hdr-web').textContent.trim(),
-      telefono: document.getElementById('hdr-tel').textContent.trim(),
-      social : document.getElementById('hdr-social').textContent.trim(),
-    },
-    items        : filas,
-    timestamp    : new Date().toISOString(),
-  };
-
-  try {
-    const r = await fetch(ENDPOINT_ENVIO, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify(payload),
-    });
-
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-
-    setStatus('Cotización enviada ✓', 'ok');
-    btn.textContent = '✉ Enviar';
-    btn.disabled = false;
-  } catch (e) {
-    console.error('Error al enviar:', e.message);
-    setStatus('Error al enviar — ver consola', 'warn');
-    btn.textContent = '✉ Enviar';
-    btn.disabled = false;
-    alert(`No se pudo enviar la cotización.\n${e.message}`);
-  }
-}
-
-/* ══════════════════════════════════════════
-   RESET DOCUMENTO
-══════════════════════════════════════════ */
-function resetDoc() {
-  if (!confirm('¿Restablecer el documento a los valores por defecto?')) return;
-
-  document.getElementById('p-fecha').value    = fechaTexto();
-  document.getElementById('p-dest').value     = '';
-  document.getElementById('p-analista').value = 'Michelle Aguero';
-  document.getElementById('p-cargo').textContent = 'Analista RAC';
-  document.getElementById('p-intro').innerHTML =
-    'En respuesta a lo solicitado, tenemos el agrado de informar nuestras tarifas <u><strong>referenciales</strong></u> de leasing operativo por los vehículos requeridos';
-  document.getElementById('hdr-web').textContent    = 'www.ssurrentacar.cl';
-  document.getElementById('hdr-tel').textContent    = '600 600 4004';
-  document.getElementById('hdr-social').textContent = 'ssurrentacar';
-
-  document.getElementById('tbody-edit').innerHTML = '';
-  rowCount = 0;
-
-  if (tablaEnEdicion) {
-    tablaEnEdicion = false;
-    document.getElementById('tabla-sec').classList.remove('editando');
-    document.getElementById('tabla-editor').style.display = 'none';
-    document.getElementById('tabla-vista').style.display  = 'block';
-    document.getElementById('btn-toggle').textContent = '✎ Editar tabla';
-  }
-
-  mockFilas();
-  renderVista();
-  setStatus('Documento restablecido', '');
-}
-
-/* ══════════════════════════════════════════
-   NOTIFICAR NUBUX (placeholder)
-══════════════════════════════════════════ */
-async function notificarNubux(id, filas) {
-  if (!id || !API_BASE) return;
-  try {
-    await fetch(`${API_BASE}/solicitudes/${id}/cotizacion`, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({
-        solicitudId : id,
-        fecha       : document.getElementById('p-fecha').value,
-        destinatario: document.getElementById('p-dest').value,
-        analista    : document.getElementById('p-analista').value,
-        items       : filas,
-        timestamp   : new Date().toISOString(),
-      }),
-    });
-  } catch (e) {
-    console.warn('No se pudo notificar a Nubux:', e.message);
-  }
-}
-
-/* ══════════════════════════════════════════
-   HELPERS DOM
-══════════════════════════════════════════ */
-function mk(tag, attrs = {}) {
-  const el = document.createElement(tag);
-  Object.entries(attrs).forEach(([k, v]) => {
-    if (k === 'inputMode') el.inputMode = v;
-    else el[k] = v;
-  });
-  return el;
-}
-
-function mkSelect(opciones, defVal) {
-  const sel = document.createElement('select');
-  opciones.forEach(({ v, t }) => {
-    const o = document.createElement('option');
-    o.value = v;
-    o.textContent = t;
-    if (v == defVal) o.selected = true;
-    sel.appendChild(o);
-  });
-  return sel;
-}
-
-function wrapTd(cls, child) {
-  const td = document.createElement('td');
-  td.className = cls;
-  td.appendChild(child);
-  return td;
-}
-
-function poblarDatalist() {
-  const dl = document.getElementById('dl-vehiculos');
-  CATALOGO.forEach(n => {
-    const o = document.createElement('option');
-    o.value = n;
-    dl.appendChild(o);
-  });
-}
-
-function setStatus(msg, tipo) {
-  const el = document.getElementById('status-bar');
-  el.textContent = msg;
-  el.className = tipo || '';
-}
-
-function fechaTexto() {
-  const d = new Date();
-  const meses = ['enero','febrero','marzo','abril','mayo','junio',
-                  'julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `Puerto Montt, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
-}
-
-/* ══════════════════════════════════════════
-   DATOS MOCK (desarrollo sin API)
-══════════════════════════════════════════ */
-function mockFilas() {
-  [
-    { cantidad: 1, modelo: 'CHEVROLET MONTANA 1.2T LT MT S',        deducible: 5, kms: 3000, plazo: 36, tarifa: '13,3' },
-    { cantidad: 1, modelo: 'CHEVROLET MONTANA 1.2T PREMIER MT S',    deducible: 5, kms: 3000, plazo: 36, tarifa: '14,1' },
-    { cantidad: 1, modelo: 'MAXUS T60 4X2 DX MT E6',                 deducible: 5, kms: 3000, plazo: 36, tarifa: '14,1' },
-    { cantidad: 1, modelo: 'GREAT WALL POER 2.0 TD 4X2 ELITE F2',   deducible: 5, kms: 3000, plazo: 36, tarifa: '15,5' },
-    { cantidad: 2, modelo: 'CHEVROLET COLORADO 2.8TD LTZ AT 4WD S', deducible: 5, kms: 3000, plazo: 36, tarifa: '22,8' },
-    { cantidad: 2, modelo: 'CHEVROLET COLORADO 2.8TD HC AT 4WD S',  deducible: 5, kms: 3000, plazo: 36, tarifa: '23,8' },
-    { cantidad: 2, modelo: 'FORD RANGER DSL XLT 4X4 2.0L AT',       deducible: 5, kms: 3000, plazo: 36, tarifa: '23,6' },
-  ].forEach(agregarFila);
-}
-</script>
+<script src="app.js"></script>
 </body>
 </html>
